@@ -38,7 +38,11 @@ cloudinary.config({
 const app = express();
 // Middlewares
 
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+  'http://localhost:5173', // Development frontend
+  'http://localhost:5174', // Development frontend (if needed)
+  'https://www.mykidzcornor.info', // Production frontend
+];
 
 app.use(cors({
   origin: (origin, callback) => {

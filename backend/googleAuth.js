@@ -4,7 +4,11 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 
 const client = new OAuth2Client('1063960380483-r5rjuccv61c7pel45o2q864ijbo45t2v.apps.googleusercontent.com');
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+    'http://localhost:5173', // Development frontend
+    'http://localhost:5174', // Development frontend (if needed)
+    'https://www.mykidzcornor.info', // Production frontend
+  ];
 
 export default (app) => {
     app.use(cors({
