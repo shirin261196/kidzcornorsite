@@ -1,0 +1,50 @@
+.image-zoom-container {
+    overflow: hidden;
+    width: 100%;
+    max-height: 500px;
+    display: inline-block;
+    position: relative;
+  }
+  
+  .zoom-image {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .zoom-image:hover {
+    transform: scale(1.5); /* Adjust the scale value for zoom level */
+  }
+  /* Make the size buttons look like boxes */
+.size-btn {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 45%;
+  text-align: center;
+  margin: 5px 0;
+  transition: all 0.3s ease;
+}
+
+.size-btn:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.size-btn.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.size-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+  .size-btn {
+    width: 100%;
+  }
+}
+
+  
