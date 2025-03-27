@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
-import { currency } from '../../App';
+import { API_URL, currency } from '../../App';
 import { Card } from 'react-bootstrap';
 import { Pagination } from "react-bootstrap";
 // Register Chart.js components
@@ -37,7 +37,7 @@ const SalesReport = () => {
   const fetchSalesReport = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:4000/api/reports/generate', {
+      const response = await axios.get(`${API_URL}/api/reports/generate`, {
         params: {
           filter,
           startDate: startDate ? moment(startDate).format('YYYY-MM-DD') : undefined,
@@ -124,7 +124,7 @@ const SalesReport = () => {
   // Download Report
   const downloadReport = async (type) => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/reports/download/${type}`, {
+      const response = await axios.get(`${API_URL}/api/reports/download/${type}`, {
         responseType: 'blob',
         params: {
           startDate: startDate ? moment(startDate).format('YYYY-MM-DD') : undefined,

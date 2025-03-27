@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { fetchCategories } from '../../redux/slices/categorySlice.js';
-import { backendUrl, currency } from '../../App';
+import { API_URL, currency } from '../../App';
 import { Pagination } from 'react-bootstrap';
 
 const List = () => {
@@ -26,7 +26,7 @@ const List = () => {
   const fetchList = async () => {
     setIsLoadingProducts(true);
     try {
-      const response = await axios.get(`${backendUrl}/admin/products/list`, {
+      const response = await axios.get(`${API_URL}/admin/products/list`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -72,7 +72,7 @@ const List = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.delete(
-            `${backendUrl}/admin/products/${productId}`,
+            `${API_URL}/admin/products/${productId}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
@@ -100,7 +100,7 @@ const List = () => {
   const restoreProduct = async (productId) => {
     try {
       const response = await axios.put(
-        `${backendUrl}/admin/products/restore/${productId}`,
+        `${API_URL}/admin/products/restore/${productId}`,
         {},
         {
           headers: {

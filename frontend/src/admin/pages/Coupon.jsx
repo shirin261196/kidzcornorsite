@@ -9,6 +9,9 @@ import Swal from 'sweetalert2';
 
 const CouponManagement = () => {
   const dispatch = useDispatch();
+  const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
 
   const { products, loading: productsLoading, error: productsError } = useSelector((state) => state.products);
   const { categories, loading: categoriesLoading, error: categoriesError } = useSelector((state) => state.categories);
@@ -28,30 +31,51 @@ const CouponManagement = () => {
     fetchOffers();
   }, [dispatch]);
 
-  // Fetch Coupons
   const fetchCoupons = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/admin/coupon', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found. Please log in.');
+      }
+  
+      const response = await axios.get(`${API_URL}/admin/coupon`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      setCoupons(response.data.data);
+  
+      if (response.data.success) {
+        setCoupons(response.data.data || []);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch coupons.');
+      }
     } catch (error) {
-      console.error('Error fetching coupons:', error);
+      console.error('Error fetching coupons:', error.response?.data || error.message);
+      Swal.fire('Error', error.message || 'Error fetching coupons.', 'error');
     }
   };
-
+  
   // Fetch Offers
   const fetchOffers = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/admin/offers', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found. Please log in.');
+      }
+  
+      const response = await axios.get(`${API_URL}/admin/offers`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
-      setOffers(response.data.offers);
+  
+      if (response.data.success) {
+        setOffers(response.data.offers || []);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch offers.');
+      }
     } catch (error) {
-      console.error('Error fetching offers:', error);
+      console.error('Error fetching offers:', error.response?.data || error.message);
+      Swal.fire('Error', error.message || 'Error fetching offers.', 'error');
     }
   };
-
+  
   // Handle Coupon Form Submission
   const handleCouponSubmit = async (data) => {
     // Validate the expiry date
@@ -64,26 +88,37 @@ const CouponManagement = () => {
     }
   
     try {
-      await axios.post('http://localhost:4000/admin/coupon', {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found. Please log in.');
+      }
+  
+      await axios.post(`${API_URL}/admin/coupon`, {
         code: data.couponCode,
         discount: data.discount,
         expiryDate: data.expiryDate,
-        minPurchaseAmount: data.minPurchaseAmount, // Include minimum purchase amount
+        minPurchaseAmount: data.minPurchaseAmount,
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
+  
       Swal.fire('Success', 'Coupon created successfully!', 'success');
-      fetchCoupons();
+      fetchCoupons(); // Re-fetch coupons to reflect the changes
       couponReset();
     } catch (error) {
-      Swal.fire('Error', error.response.data.message, 'error');
+      console.error('Error creating coupon:', error.response?.data || error.message);
+      Swal.fire('Error', error.response?.data?.message || 'Error creating coupon.', 'error');
     }
   };
   
-
   // Handle Offer Form Submission
   const handleOfferSubmit = async (data) => {
     try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found. Please log in.');
+      }
+  
       const offerData = {
         offerType: data.offerType,
         offerCode: data.offerCode,
@@ -91,15 +126,15 @@ const CouponManagement = () => {
         discount: data.offerDiscount,
         expiryDate: new Date(data.offerExpiryDate),
       };
-
+  
       // Add the productId or categoryId depending on the offer type
       if (data.offerType === 'Product') {
         offerData.productId = selectedProduct;
       } else if (data.offerType === 'Category') {
         offerData.categoryId = selectedCategory;
       }
-
-      let endpoint = 'http://localhost:4000/admin/offers';
+  
+      let endpoint = `${API_URL}/admin/offers`;
       if (data.offerType === 'Product') {
         endpoint += '/product';
       } else if (data.offerType === 'Category') {
@@ -107,17 +142,20 @@ const CouponManagement = () => {
       } else if (data.offerType === 'Referral') {
         endpoint += '/referral';
       }
-
+  
       await axios.post(endpoint, offerData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+        headers: { Authorization: `Bearer ${adminToken}` },
       });
+  
       offerReset();
+      fetchOffers(); // Re-fetch offers to reflect the changes
       Swal.fire('Success', 'Offer created successfully!', 'success');
     } catch (error) {
-      Swal.fire('Error', error.response?.data?.message || 'Something went wrong.', 'error');
+      console.error('Error creating offer:', error.response?.data || error.message);
+      Swal.fire('Error', error.response?.data?.message || 'Error creating offer.', 'error');
     }
   };
-
+  
   // Handle Delete Offer
   const handleDeleteOffer = async (offerId) => {
     Swal.fire({
@@ -130,18 +168,25 @@ const CouponManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:4000/admin/offers/${offerId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          const adminToken = localStorage.getItem('adminToken');
+          if (!adminToken) {
+            throw new Error('Admin token not found. Please log in.');
+          }
+  
+          await axios.delete(`${API_URL}/admin/offers/${offerId}`, {
+            headers: { Authorization: `Bearer ${adminToken}` },
           });
+  
           Swal.fire('Deleted!', 'Offer has been deleted.', 'success');
-           // Re-fetch the offers to reflect the changes
+          fetchOffers(); // Re-fetch offers to reflect the changes
         } catch (error) {
-          Swal.fire('Error', error.response?.data?.message || 'Error deleting offer', 'error');
+          console.error('Error deleting offer:', error.response?.data || error.message);
+          Swal.fire('Error', error.response?.data?.message || 'Error deleting offer.', 'error');
         }
       }
     });
   };
-
+  
   // Handle Delete Coupon
   const handleDeleteCoupon = async (couponId) => {
     Swal.fire({
@@ -154,18 +199,25 @@ const CouponManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:4000/admin/coupon/${couponId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          const adminToken = localStorage.getItem('adminToken');
+          if (!adminToken) {
+            throw new Error('Admin token not found. Please log in.');
+          }
+  
+          await axios.delete(`${API_URL}/admin/coupon/${couponId}`, {
+            headers: { Authorization: `Bearer ${adminToken}` },
           });
+  
           Swal.fire('Deleted!', 'Coupon has been deleted.', 'success');
-            // Re-fetch the coupons to reflect the changes
+          fetchCoupons(); // Re-fetch coupons to reflect the changes
         } catch (error) {
-          Swal.fire('Error', error.response?.data?.message || 'Error deleting coupon', 'error');
+          console.error('Error deleting coupon:', error.response?.data || error.message);
+          Swal.fire('Error', error.response?.data?.message || 'Error deleting coupon.', 'error');
         }
       }
     });
   };
-
+  
   // Handle Deactivate Coupon
   const handleDeactivateCoupon = async (couponId) => {
     Swal.fire({
@@ -178,18 +230,24 @@ const CouponManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.put(`http://localhost:4000/admin/coupon/deactivate/${couponId}`, {}, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+          const adminToken = localStorage.getItem('adminToken');
+          if (!adminToken) {
+            throw new Error('Admin token not found. Please log in.');
+          }
+  
+          await axios.put(`${API_URL}/admin/coupon/deactivate/${couponId}`, {}, {
+            headers: { Authorization: `Bearer ${adminToken}` },
           });
+  
           Swal.fire('Deactivated!', 'Coupon has been deactivated.', 'success');
-          fetchCoupons();  // Re-fetch the coupons to reflect the changes
+          fetchCoupons(); // Re-fetch coupons to reflect the changes
         } catch (error) {
-          Swal.fire('Error', error.response?.data?.message || 'Error deactivating coupon', 'error');
+          console.error('Error deactivating coupon:', error.response?.data || error.message);
+          Swal.fire('Error', error.response?.data?.message || 'Error deactivating coupon.', 'error');
         }
       }
     });
   };
-
   // React Hook Form initialization for Coupon Form
 
 const { register: couponRegister, handleSubmit: couponHandleSubmit, formState: couponFormState, reset: couponReset } = useForm();

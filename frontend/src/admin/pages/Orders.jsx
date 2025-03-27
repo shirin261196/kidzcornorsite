@@ -8,7 +8,7 @@ import {
 } from '../../redux/slices/adminSlice.js';
 import { Button, Table, Spinner, Alert, Pagination } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { currency } from '../../App';
+import { API_URL, currency } from '../../App';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
@@ -51,7 +51,7 @@ const AdminOrderManagement = () => {
     if (confirmResult.isConfirmed) {
       try {
         const response = await axios.put(
-          `http://localhost:4000/admin/orders/${orderId}/items/${itemId}/approve-return`,
+          `${API_URL}/admin/orders/${orderId}/items/${itemId}/approve-return`,
           { approvalStatus: 'APPROVED' }, // Send approval status
           {
             headers: {
@@ -83,7 +83,7 @@ const AdminOrderManagement = () => {
     if (confirmResult.isConfirmed) {
       try {
         const response = await axios.post(
-          `http://localhost:4000/admin/orders/${orderId}/process-refund`,
+          `${API_URL}/admin/orders/${orderId}/process-refund`,
           {},
           {
             headers: {

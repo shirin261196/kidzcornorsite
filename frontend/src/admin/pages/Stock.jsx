@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, selectFilteredProducts, updateProductStock } from '../../redux/slices/productSlice';
 import { toast } from 'react-toastify';
 import { Pagination } from 'react-bootstrap';
+import { API_URL } from '../../App';
 
 const AdminStockManagement = () => {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ const AdminStockManagement = () => {
     }
   
     try {
-      const response = await fetch(`http://localhost:4000/admin/products/update-stock/${id}`, {
+      const response = await fetch(`${API_URL}/admin/products/update-stock/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

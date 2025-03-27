@@ -35,11 +35,16 @@ const AddProduct = () => {
     },
   });
 
+  // Define the base URL for API calls
+  const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
+
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/admin/category', {
+        const response = await axios.get(`${API_URL}/admin/category`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
           },

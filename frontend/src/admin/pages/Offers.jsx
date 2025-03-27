@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { fetchProducts } from '../../redux/slices/productSlice';
 import { fetchCategories } from '../../redux/slices/categorySlice';
+import { API_URL } from '../../App';
 
 const OfferManagement = () => {
   const dispatch = useDispatch();
@@ -33,7 +34,7 @@ const OfferManagement = () => {
 
   const fetchOffers = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/admin/offers', {
+      const response = await axios.get(`${API_URL}/admin/offers`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       });
       if (response.data.success) {
@@ -63,10 +64,10 @@ const OfferManagement = () => {
 
     try {
       const response = offerData._id
-        ? await axios.put(`http://localhost:4000/admin/offers/${offerData._id}`, sanitizedOfferData, {
+        ? await axios.put(`${API_URL}/admin/offers/${offerData._id}`, sanitizedOfferData, {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
           })
-        : await axios.post('http://localhost:4000/admin/offers', sanitizedOfferData, {
+        : await axios.post(`${API_URL}/admin/offers`, sanitizedOfferData, {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
           });
 
@@ -97,7 +98,7 @@ const OfferManagement = () => {
 
   const handleDeleteOffer = async (offerId) => {
     try {
-      const response = await axios.delete(`http://localhost:4000/admin/offers/${offerId}`, {
+      const response = await axios.delete(`${API_URL}/admin/offers/${offerId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
       });
       if (response.data.success) {

@@ -18,7 +18,7 @@ const Ledger = () => {
 
   // Axios instance with auth header
   const axiosInstance = axios.create({
-    baseURL: 'http://localhost:4000/admin',
+    baseURL: 'https://api.mykidzcornor.info/admin',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',

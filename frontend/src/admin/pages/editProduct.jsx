@@ -34,10 +34,14 @@ const EditProduct = () => {
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm();
 
+  const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:4000/admin/products/${id}`, {
+        const response = await axios.get(`${API_URL}/admin/products/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
         });
         const data = response.data.product;
@@ -66,7 +70,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/admin/category', {
+        const response = await axios.get(`${API_URL}/admin/category`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
         });
 
@@ -140,7 +144,7 @@ const EditProduct = () => {
       // Remove image from the cloud storage if it's an existing one
       axios
         .post(
-          'http://localhost:4000/admin/products/delete-image',
+          `${API_URL}/admin/products/delete-image`,
           { public_id: imageToRemove.public_id },
           {
             headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
@@ -206,7 +210,7 @@ const EditProduct = () => {
     });
   
     try {
-      const response = await axios.put(`http://localhost:4000/admin/products/${id}`, formData, {
+      const response = await axios.put(`${API_URL}/admin/products/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('adminToken')}`,

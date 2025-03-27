@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { backendUrl } from "../../App.jsx";
+import { API_URL } from "../../App.jsx";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { Pagination } from "react-bootstrap";
@@ -11,7 +11,7 @@ const Users = () => {
     const [usersPerPage] = useState(10); // You can change this to any number
 
     useEffect(() => {
-        axios.get(`${backendUrl}/admin/users`, {
+        axios.get(`${API_URL}/admin/users`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
             },
@@ -36,7 +36,7 @@ const Users = () => {
         if (result.isConfirmed) {
             try {
                 const response = await axios.put(
-                    `${backendUrl}/admin/users/${userId}`,
+                    `${API_URL}/admin/users/${userId}`,
                     {},
                     {
                         headers: {

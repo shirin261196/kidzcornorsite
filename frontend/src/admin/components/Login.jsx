@@ -7,7 +7,7 @@ import { loginRequest, loginSuccess, loginFailure } from '../../redux/slices/aut
 import styled from 'styled-components';
 import axios from 'axios';
 import { ShopContext } from '../../context/ShopContext';
-import { backendUrl } from '../../App';
+import { API_URL } from '../../App';
 
 const Container = styled.div`
   display: flex;
@@ -69,7 +69,7 @@ const AdminLogin = () => {
   const handleLogin = async (data) => {
     dispatch(loginRequest());
     try {
-      const response = await axios.post(`${backendUrl}/admin/login`, data, { withCredentials: true });
+      const response = await axios.post(`${API_URL}/admin/login`, data, { withCredentials: true });
       if (response?.data?.success) {
         const { token, user } = response.data;
         localStorage.setItem('adminToken', token);

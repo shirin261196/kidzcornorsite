@@ -32,9 +32,13 @@ const CategoryManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [categoriesPerPage] = useState(10);
 
+    const API_URL = process.env.NODE_ENV === 'production'
+    ? 'https://api.mykidzcornor.info'
+    : 'http://localhost:4000';
+  
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${backendUrl}/admin/category`, {
+            const response = await axios.get(`${API_URL}/admin/category`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
             });
             if (response.data.success) {
@@ -105,7 +109,7 @@ const CategoryManagement = () => {
         if (result.isConfirmed) {
             try {
                 const response = await axios.put(
-                    `${backendUrl}/admin/category/${id}/delete`,
+                    `${{API_URL}}/admin/category/${id}/delete`,
                     { isDeleted: true },
                     { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
                 );
@@ -136,7 +140,7 @@ const CategoryManagement = () => {
         if (result.isConfirmed) {
             try {
                 const response = await axios.put(
-                    `${backendUrl}/admin/category/${id}/restore`,
+                    `${{API_URL}}/admin/category/${id}/restore`,
                     { isDeleted: false },
                     { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
                 );
@@ -172,7 +176,7 @@ const CategoryManagement = () => {
     
         try {
             const response = await axios.put(
-                `${backendUrl}/admin/category/${editingCategory}`, 
+                `${{API_URL}}/admin/category/${editingCategory}`, 
                 { ...data, name: trimmedName }, // Save trimmed name
                 { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
             );

@@ -12,8 +12,11 @@ import ShopContextProvider from "./context/ShopContext.jsx";
 import UserRoutes from "./routes/userRoutes.jsx";
 import AdminRoutes from "./routes/AdminRoutes.jsx";
 
-export const backendUrl = 'http://localhost:4000'
+// export const backendUrl = 'http://localhost:4000'
 export const currency = "₹";
+export const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'
 
 // Removed ProtectedRoute to check directly
 const App = () => {
