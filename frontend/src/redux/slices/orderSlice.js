@@ -9,13 +9,17 @@ const initialState = {
   error: null,
 };
 
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; 
+  
 // Thunks for API calls
 export const fetchOrderHistory = createAsyncThunk(
   'order/fetchOrderHistory',
   async (userId, { rejectWithValue }) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get('http://localhost:4000/user/orders', {
+      const response = await axios.get(`${API_URL}/user/orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +39,7 @@ export const cancelOrder = createAsyncThunk(
     console.log("API Request - OrderId:", orderId, "ItemId:", itemId); // Add debugging
     try {
       const response = await axios.delete(
-        `http://localhost:4000/user/orders/${orderId}?itemId=${itemId}`,
+        `${API_URL}/user/orders/${orderId}?itemId=${itemId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -58,7 +62,7 @@ export const fetchWalletBalance = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get('http://localhost:4000/user/wallet/balance', {
+      const response = await axios.get(`${API_URL}/user/wallet/balance`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -84,7 +88,7 @@ export const returnOrder = createAsyncThunk(
     }
     try {
       const response = await axios.put(
-        `http://localhost:4000/user/orders/${orderId}/return`,
+        `${API_URL}/user/orders/${orderId}/return`,
         {itemId,orderId}, // Send an empty body if required
         {
           headers: {
@@ -106,7 +110,7 @@ export const handlePaymentFailure = createAsyncThunk(
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        'http://localhost:4000/orders/user/payment-failed',
+        `${API_URL}/orders/user/payment-failed`,
         { orderId },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -125,7 +129,7 @@ export const retryPayment = createAsyncThunk(
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        'http://localhost:4000/orders/user/retry-payment',
+        `${API_URL}/orders/user/retry-payment`,
         { orderId },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -148,7 +152,7 @@ export const createOrder = createAsyncThunk(
     console.log("📤 Order Data Sent:", { items, totalPrice, address, discountAmount, finalPrice, paymentMethod });
     try {
       const response = await axios.post(
-        `http://localhost:4000/user/orders/create`,
+        `${API_URL}/user/orders/create`,
         { items, totalPrice, address,discountAmount,finalPrice, paymentMethod },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -1,59 +1,117 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-export const fetchAddresses = createAsyncThunk('user/fetchAddresses', async (_, thunkAPI) => {
-  const token = localStorage.getItem('token');
-  const response = await axios.get('http://localhost:4000/user/address', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-});
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
 
-export const addAddress = createAsyncThunk('address/addAddress', async (addressData) => {
-  const token = localStorage.getItem('token');
-  const response = await axios.post('http://localhost:4000/user/address', addressData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-});
+export const fetchAddresses = createAsyncThunk(
+  'user/fetchAddresses',
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
+      const response = await axios.get(`${API_URL}/user/address`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        return response.data.addresses || [];
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch addresses.');
+      }
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to fetch addresses.');
+    }
+  }
+);
+
+export const addAddress = createAsyncThunk(
+  'address/addAddress',
+  async (addressData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
+      const response = await axios.post(`${API_URL}/user/address`, addressData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        return response.data.address;
+      } else {
+        throw new Error(response.data.message || 'Failed to add address.');
+      }
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to add address.');
+    }
+  }
+);
 
 export const updateAddress = createAsyncThunk(
   'address/updateAddress',
   async (addressData, { rejectWithValue }) => {
     try {
-      const { addressId, ...updatedData } = addressData; // Use `id` for the API call
+      const { addressId, ...updatedData } = addressData;
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await axios.put(
-        `http://localhost:4000/user/address/${addressId}`,
+        `${API_URL}/user/address/${addressId}`,
         updatedData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      return response.data;
+
+      if (response.data.success) {
+        return response.data.address;
+      } else {
+        throw new Error(response.data.message || 'Failed to update address.');
+      }
     } catch (error) {
-      return rejectWithValue(error.response.data || 'Failed to update address');
+      return rejectWithValue(error.message || 'Failed to update address.');
     }
   }
 );
 
-export const deleteAddress = createAsyncThunk('address/deleteAddress', async ({ addressId }, thunkAPI) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await axios.delete(`http://localhost:4000/user/address/${addressId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return { addressId }; // Return only the id for filtering
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.response?.data || error.message);
+export const deleteAddress = createAsyncThunk(
+  'address/deleteAddress',
+  async ({ addressId }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
+      const response = await axios.delete(`${API_URL}/user/address/${addressId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.success) {
+        return { addressId };
+      } else {
+        throw new Error(response.data.message || 'Failed to delete address.');
+      }
+    } catch (error) {
+      return rejectWithValue(error.message || 'Failed to delete address.');
+    }
   }
-});
+);
 
 const addressSlice = createSlice({
   name: 'address',

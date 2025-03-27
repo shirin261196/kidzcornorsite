@@ -7,8 +7,12 @@ const initialState = {
   error: null,
 };
 
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; 
+
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
-  const response = await fetch('http://localhost:4000/admin/products/list');
+  const response = await fetch(`${API_URL}/admin/products/list`);
   const data = await response.json();
 
   if (!response.ok || !data.success) {

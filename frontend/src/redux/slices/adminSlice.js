@@ -9,6 +9,9 @@ const initialState = {
 };
 
 // Thunks for Admin Order Management API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
 
 // Fetch all orders
 export const fetchOrders = createAsyncThunk(
@@ -16,7 +19,7 @@ export const fetchOrders = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const token = localStorage.getItem('adminToken');
     try {
-      const response = await axios.get('http://localhost:4000/admin/orders', {
+      const response = await axios.get(`${API_URL}/admin/orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -34,7 +37,7 @@ export const updateOrderStatus = createAsyncThunk(
       const token = localStorage.getItem('adminToken');
       try {
         const response = await axios.patch(
-          `http://localhost:4000/admin/orders/${orderId}/status`,
+          `${API_URL}/admin/orders/${orderId}/status`,
           { status },
           {
             headers: {
@@ -58,7 +61,7 @@ export const updateOrderStatus = createAsyncThunk(
       }
       try {
         const response = await axios.put(
-          `http://localhost:4000/admin/orders/${orderId}/item/${productId}/tracking-status`,
+          `${API_URL}/admin/orders/${orderId}/item/${productId}/tracking-status`,
           {trackingStatus}, // Send an empty body if required
           {
             headers: {
@@ -80,7 +83,7 @@ export const cancelAdminOrder = createAsyncThunk(
   async (orderId, { rejectWithValue }) => {
     const token = localStorage.getItem('adminToken');
     try {
-      const response = await axios.delete(`http://localhost:4000/admin/orders/${orderId}`, {
+      const response = await axios.delete(`${API_URL}/admin/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -99,7 +102,7 @@ export const approveReturnRequest = createAsyncThunk(
       const token = localStorage.getItem('adminToken');
       try {
         const response = await axios.put(
-          `http://localhost:4000/admin/orders/${orderId}/item/${productId}/approve-return`,
+          `${API_URL}/admin/orders/${orderId}/item/${productId}/approve-return`,
           {},
           {
             headers: {

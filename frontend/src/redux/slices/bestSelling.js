@@ -1,13 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
+
 // Fetch best-selling products
 export const fetchBestSellingProducts = createAsyncThunk(
   "best/fetchBestSellingProducts",
   async (_, { rejectWithValue }) => {
     try {
     const token = localStorage.getItem('token');
-      const { data } = await axios.get("http://localhost:4000/products/best-selling-products",  {
+      const { data } = await axios.get(`${API_URL}/products/best-selling-products`,  {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -25,7 +29,7 @@ export const fetchBestSellingCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
         const token = localStorage.getItem('token');
-      const { data } = await axios.get("http://localhost:4000/products/best-selling-categories",{ headers: {
+      const { data } = await axios.get(`${API_URL}/products/best-selling-categories`,{ headers: {
         Authorization: `Bearer ${token}`,
       },});
       return data.topCategories;
@@ -41,7 +45,7 @@ export const fetchBestSellingBrands = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
         const token = localStorage.getItem('token');
-      const { data } = await axios.get("http://localhost:4000/products/best-selling-brands",{ headers: {
+      const { data } = await axios.get(`${API_URL}/products/best-selling-brands`,{ headers: {
         Authorization: `Bearer ${token}`,
       },});
       return data.topBrands;

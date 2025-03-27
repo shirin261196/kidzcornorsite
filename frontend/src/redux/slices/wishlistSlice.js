@@ -1,10 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; 
+
 // Fetch wishlist items for a specific user
 export const fetchWishlist = createAsyncThunk('wishlist/fetchWishlist', async (userId, thunkAPI) => {
   try {
-    const response = await axios.get(`http://localhost:4000/user/wishlist/${userId}`);
+    const response = await axios.get(`${API_URL}/user/wishlist/${userId}`);
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
@@ -14,7 +19,7 @@ export const fetchWishlist = createAsyncThunk('wishlist/fetchWishlist', async (u
 // Add an item to the wishlist
 export const addToWishlist = createAsyncThunk('wishlist/addToWishlist', async (item, thunkAPI) => {
   try {
-    const response = await axios.post('http://localhost:4000/user/wishlist/add', item);
+    const response = await axios.post(`${API_URL}/user/wishlist/add`, item);
     console.log(response.data.wishlist)
     return response.data.wishlist;
   } catch (error) {
@@ -25,7 +30,7 @@ export const addToWishlist = createAsyncThunk('wishlist/addToWishlist', async (i
 // Remove an item from the wishlist
 export const removeFromWishlist = createAsyncThunk('wishlist/removeFromWishlist', async (item, thunkAPI) => {
   try {
-    const response = await axios.delete('http://localhost:4000/user/wishlist/remove', { data: item });
+    const response = await axios.delete(`${API_URL}/user/wishlist/remove`, { data: item });
     return response.data.wishlist;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);

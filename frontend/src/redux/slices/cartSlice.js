@@ -10,7 +10,10 @@ const initialState = {
   status: 'idle', // idle | loading | succeeded | failed
   error: null,
 };
-
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; 
+  
 // Helper to calculate total price (no coupon/offer)
 const calculateTotalPrice = (items) => {
   return items.reduce(
@@ -25,7 +28,7 @@ export const fetchCart = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:4000/user/cart/${userId}`, {
+      const response = await axios.get(`${API_URL}/user/cart/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -48,7 +51,7 @@ export const addToCart = createAsyncThunk(
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(
-        'http://localhost:4000/user/cart/add',
+        `${API_URL}/user/cart/add`,
         { userId, productId, size, quantity, images, stock, discountPrice },
         {
           headers: {
@@ -69,7 +72,7 @@ export const updateCartItemQty = createAsyncThunk(
     const token = localStorage.getItem('token');
     try {
       const response = await axios.put(
-        'http://localhost:4000/user/cart/update',
+        `${API_URL}/user/cart/update`,
         { userId, productId, size, quantity, discountPrice },
         {
           headers: {
@@ -90,7 +93,7 @@ export const removeFromCart = createAsyncThunk(
     const token = localStorage.getItem('token');
     try {
       const response = await axios.delete(
-        `http://localhost:4000/user/cart/remove/${userId}/${productId}`, // No need for size in URL
+        `${API_URL}/user/cart/remove/${userId}/${productId}`, // No need for size in URL
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,7 +111,7 @@ export const removeFromCart = createAsyncThunk(
 export const clearCart = createAsyncThunk('cart/clearCart', async (userId, { rejectWithValue }) => {
   const token = localStorage.getItem('token');
   try {
-    const response = await axios.delete(`http://localhost:4000/user/cart/clear/${userId}`, {
+    const response = await axios.delete(`${API_URL}/user/cart/clear/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

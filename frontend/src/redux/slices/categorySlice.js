@@ -7,11 +7,15 @@ const initialState = {
   error: null,
 };
 
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; 
+
 // Async thunk to fetch active categories
 export const fetchCategories = createAsyncThunk(
   'categories/fetchCategories',
   async () => {
-    const response = await fetch('http://localhost:4000/admin/category/active');
+    const response = await fetch(`${API_URL}/admin/category/active`);
     const data = await response.json();
 
     if (!response.ok || !data.success) {
