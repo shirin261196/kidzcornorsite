@@ -350,10 +350,15 @@ const user = useSelector((state) => state.user.user);
   
     razorpay.open();
   };
-  
+  const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000';
+
   const markPaymentAsFailed = async (razorpayOrderId) => {
     try {
-      await axios.post('http://localhost:4000/user/orders/payment-failed', { razorpay_order_id: razorpayOrderId, });
+await axios.post(`${API_URL}/user/orders/payment-failed`, {
+      razorpay_order_id: razorpayOrderId,
+    });
       console.log("Order marked as failed.");
     } catch (error) {
       console.error("Error updating failed payment:", error);
@@ -371,7 +376,7 @@ const user = useSelector((state) => state.user.user);
     console.log("🔍 Sending Order ID:", response.razorpay_order_id);
 
     try {
-      const verifyResponse = await axios.post('http://localhost:4000/user/orders/verify-payment', {
+      const verifyResponse = await axios.post(`${API_URL}/user/orders/verify-payment`, {
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_order_id: response.razorpay_order_id,
         razorpay_signature: response.razorpay_signature,

@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../redux/slices/authSlice";
 
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
+
 const ForgotPassword = () => {
   const [step, setStep] = useState(1); // Step 1: Send OTP, Step 2: Reset Password
   const [email, setEmail] = useState("");
@@ -14,11 +19,16 @@ const ForgotPassword = () => {
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
+  // Redirect authenticated users to the homepage
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
-  
-  
-
+  // Timer for OTP resend
   useEffect(() => {
     if (timer > 0 && step === 2) {
       const interval = setInterval(() => {
@@ -34,50 +44,53 @@ const ForgotPassword = () => {
   const handleSendOtp = async (data) => {
     try {
       setEmail(data.email); // Save email for the next step
-      const response = await axios.post("http://localhost:4000/forgot-password", { email: data.email });
+      const response = await axios.post(`${API_URL}/forgot-password`, { email: data.email });
       if (response.data.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message || "OTP sent successfully!");
         setStep(2);
         setTimer(60); // Reset timer to 60 seconds
         setOtpDisabled(true); // Disable OTP resend button
       } else {
-        toast.error(response.data.message);
+        toast.error(response.data.message || "Failed to send OTP.");
       }
     } catch (error) {
-      toast.error("Error sending OTP");
+      console.error("Error sending OTP:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error sending OTP. Please try again.");
     }
   };
 
   const handleResendOtp = async () => {
     try {
-      const response = await axios.post("http://localhost:4000/resend-otp", { email });
+      const response = await axios.post(`${API_URL}/resend-otp`, { email });
       if (response.data.success) {
-        toast.success("OTP resent successfully");
+        toast.success("OTP resent successfully!");
         setTimer(60); // Reset timer to 60 seconds
         setOtpDisabled(true); // Disable OTP resend button
       } else {
-        toast.error("Invalid OTP");
+        toast.error(response.data.message || "Failed to resend OTP.");
       }
     } catch (error) {
-      toast.error("Error resending OTP");
+      console.error("Error resending OTP:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error resending OTP. Please try again.");
     }
   };
 
   const handleResetPassword = async (data) => {
     try {
-      const response = await axios.post("http://localhost:4000/reset-password", {
+      const response = await axios.post(`${API_URL}/reset-password`, {
         email,
         otp: data.otp,
         newPassword: data.newPassword,
       });
       if (response.data.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message || "Password reset successfully!");
         navigate("/login");
       } else {
-        toast.error(response.data.message);
+        toast.error(response.data.message || "Failed to reset password.");
       }
     } catch (error) {
-      toast.error("Error resetting password");
+      console.error("Error resetting password:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error resetting password. Please try again.");
     }
   };
 
@@ -118,7 +131,13 @@ const ForgotPassword = () => {
                         type="text"
                         id="otp"
                         className="form-control"
-                        {...register("otp", { required: "OTP is required" })}
+                        {...register("otp", { 
+                          required: "OTP is required",
+                          pattern: {
+                            value: /^\d{6}$/,
+                            message: "OTP must be a 6-digit number",
+                          },
+                        })}
                       />
                       {errors.otp && <p className="text-danger">{errors.otp.message}</p>}
                     </div>
@@ -133,6 +152,10 @@ const ForgotPassword = () => {
                           minLength: {
                             value: 6,
                             message: "Password must be at least 6 characters long",
+                          },
+                          pattern: {
+                            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+                            message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
                           },
                         })}
                       />

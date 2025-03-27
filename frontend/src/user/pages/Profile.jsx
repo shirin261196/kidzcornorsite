@@ -11,6 +11,11 @@ import { creditWallet, debitWallet } from '../../redux/slices/walletSlice';
 import axios from 'axios';
 import WalletHistory from '../components/WalletHistory.jsx';
 
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
+
 const UserProfile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -18,9 +23,8 @@ const UserProfile = () => {
   const addresses = useSelector(selectAddresses);
   const user = useSelector(selectUser);
 
-const [transactionAmount, setTransactionAmount] = useState(0);
+  const [transactionAmount, setTransactionAmount] = useState(0);
 
-  
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // Number of addresses per page
@@ -41,42 +45,44 @@ const [transactionAmount, setTransactionAmount] = useState(0);
   });
 
   useEffect(() => {
-    dispatch(fetchUserProfile(user.id));
-    dispatch(fetchAddresses());
-  }, [dispatch, user.id]);
+    if (user?.id) {
+      dispatch(fetchUserProfile(user.id));
+      dispatch(fetchAddresses());
+      dispatch(fetchWalletBalance());
+    } else {
+      navigate('/login'); // Redirect to login if user is not authenticated
+    }
+  }, [dispatch, user, navigate]);
 
-  useEffect(() => {
-    dispatch(fetchWalletBalance());
-  }, [dispatch]); // Re-fetch when walletBalance changes
-  
   const handleWalletAction = (action) => {
     if (!transactionAmount || transactionAmount <= 0) {
       Swal.fire('Invalid amount', 'Please enter a valid amount.', 'error');
       return;
     }
-  
+
     if (action === 'credit') {
       dispatch(creditWallet({ userId: user.id, amount: transactionAmount }))
         .unwrap()
         .then(() => {
           Swal.fire('Success', 'Wallet credited successfully.', 'success');
           setTransactionAmount(0);
+          dispatch(fetchWalletBalance()); // Refresh wallet balance
         })
         .catch((error) => {
-          Swal.fire('Error', error.message, 'error');
+          Swal.fire('Error', error.message || 'Failed to credit wallet.', 'error');
         });
     } else if (action === 'debit') {
       if (transactionAmount > walletBalance) {
         Swal.fire('Error', 'Insufficient wallet balance.', 'error');
         return;
       }
-  
+
       // Store transaction details in localStorage or Redux
       localStorage.setItem(
         "walletPayment",
         JSON.stringify({ userId: user.id, amount: transactionAmount })
       );
-  
+
       // Navigate to checkout page
       navigate('/checkout', {
         state: { 
@@ -86,8 +92,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
       });
     }
   };
-  
-  
+
   const handleRazorpayPayment = async () => {
     if (!transactionAmount || transactionAmount <= 0) {
       Swal.fire('Invalid amount', 'Please enter a valid amount.', 'error');
@@ -96,65 +101,107 @@ const [transactionAmount, setTransactionAmount] = useState(0);
 
     try {
       const requestBody = {
-        amount: transactionAmount,  // ✅ Make sure this is a valid number
-        userId: user.id,  // ✅ Make sure this exists
+        amount: transactionAmount,
+        userId: user.id,
       };
 
+      console.log("Sending Request:", requestBody);
 
-  console.log("Sending Request:", requestBody);
+      // Dynamically load Razorpay script
+      const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = () => resolve(true);
+          script.onerror = () => resolve(false);
+          document.body.appendChild(script);
+        });
+      };
+
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load Razorpay SDK. Please try again.',
+        });
+        return;
+      }
 
       // Call backend to create a Razorpay order
-      const response = await axios.post('http://localhost:4000/wallet/create-order', {
+      const response = await axios.post(`${API_URL}/wallet/create-order`, {
         amount: transactionAmount,
-        userId: user.id
+        userId: user.id,
       }, {
-        headers: { 'Content-Type': 'application/json' }  // ✅ Ensure JSON headers
+        headers: { 'Content-Type': 'application/json' },
       });
-      
 
-      const orderData = await response.data
+      const orderData = response.data;
 
       if (!orderData.success) {
         throw new Error(orderData.message || 'Payment initiation failed');
       }
 
       const options = {
-        key: 'rzp_test_IfwKL0Uf6Xpv2h', // Replace with your Razorpay Key ID
+        key: 'rzp_test_IfwKL0Uf6Xpv2h', // Replace with your production key in production
         amount: orderData.amount,
         currency: 'INR',
         name: 'KIDZCORNER',
         description: 'Add Money to Wallet',
         order_id: orderData.order.id,
         handler: async (response) => {
-          // Call backend to verify payment
-          const verifyResponse = await axios.post('http://localhost:4000/wallet/verify-payment', {
-            ...response,
-            userId: user.id,
-            amount: transactionAmount
-          }, {
-            headers: { 'Content-Type': 'application/json' },
-          });
-          const verifyData = await verifyResponse.data;
-          if (verifyData.success) {
-            dispatch(creditWallet({ userId: user.id, amount: transactionAmount }));
-            Swal.fire('Success', 'Wallet credited successfully.', 'success');
-            setTransactionAmount(0);
-          } else {
-            Swal.fire('Error', 'Payment verification failed.', 'error');
+          try {
+            // Call backend to verify payment
+            const verifyResponse = await axios.post(`${API_URL}/wallet/verify-payment`, {
+              ...response,
+              userId: user.id,
+              amount: transactionAmount,
+            }, {
+              headers: { 'Content-Type': 'application/json' },
+            });
+            const verifyData = verifyResponse.data;
+            if (verifyData.success) {
+              dispatch(creditWallet({ userId: user.id, amount: transactionAmount }));
+              Swal.fire('Success', 'Wallet credited successfully.', 'success');
+              setTransactionAmount(0);
+              dispatch(fetchWalletBalance()); // Refresh wallet balance
+            } else {
+              throw new Error(verifyData.message || 'Payment verification failed.');
+            }
+          } catch (error) {
+            console.error("Payment Verification Error:", error.response?.data || error.message);
+            Swal.fire('Error', error.message || 'Payment verification failed.', 'error');
           }
         },
         prefill: {
-          name: user?.name,
-          email: user?.email,
+          name: user?.name || '',
+          email: user?.email || '',
           contact: user?.phone || '',
         },
         theme: { color: '#3399cc' },
+        modal: {
+          ondismiss: () => {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Payment Cancelled',
+              text: 'You cancelled the payment. Please retry if needed.',
+            });
+          },
+        },
       };
 
       const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', (response) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed',
+          text: 'Payment failed due to an issue. Please retry.',
+        });
+      });
       razorpay.open();
     } catch (error) {
-      Swal.fire('Error', error.message, 'error');
+      console.error("Razorpay Payment Error:", error.response?.data || error.message);
+      Swal.fire('Error', error.message || 'An error occurred during payment.', 'error');
     }
   };
 
@@ -194,14 +241,28 @@ const [transactionAmount, setTransactionAmount] = useState(0);
   const handleFormSubmit = () => {
     const addressData = { ...addressForm, userId: user.id };
     if (!addressForm.fullname || !addressForm.phone || !addressForm.street || 
-      !addressForm.city || !addressForm.state || !addressForm.zip || !addressForm.country) {
-    alert('All fields are required');
-    return;
-  }
+        !addressForm.city || !addressForm.state || !addressForm.zip || !addressForm.country) {
+      Swal.fire('Error', 'All fields are required.', 'error');
+      return;
+    }
     if (addressForm._id) {
-      dispatch(updateAddress({ addressId: addressForm._id, ...addressForm }));
+      dispatch(updateAddress({ addressId: addressForm._id, ...addressForm }))
+        .unwrap()
+        .then(() => {
+          Swal.fire('Success', 'Address updated successfully.', 'success');
+        })
+        .catch((error) => {
+          Swal.fire('Error', error.message || 'Failed to update address.', 'error');
+        });
     } else {
-      dispatch(addAddress(addressData));
+      dispatch(addAddress(addressData))
+        .unwrap()
+        .then(() => {
+          Swal.fire('Success', 'Address added successfully.', 'success');
+        })
+        .catch((error) => {
+          Swal.fire('Error', error.message || 'Failed to add address.', 'error');
+        });
     }
     handleModalClose();
   };
@@ -218,8 +279,14 @@ const [transactionAmount, setTransactionAmount] = useState(0);
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(deleteAddress({ addressId }));
-        Swal.fire('Deleted!', 'The address has been deleted.', 'success');
+        dispatch(deleteAddress({ addressId }))
+          .unwrap()
+          .then(() => {
+            Swal.fire('Deleted!', 'The address has been deleted.', 'success');
+          })
+          .catch((error) => {
+            Swal.fire('Error', error.message || 'Failed to delete address.', 'error');
+          });
       }
     });
   };
@@ -234,7 +301,6 @@ const [transactionAmount, setTransactionAmount] = useState(0);
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
 
   return (
     <Container className="my-5">
@@ -267,13 +333,12 @@ const [transactionAmount, setTransactionAmount] = useState(0);
               Reset Password
             </ListGroup.Item>
             <ListGroup.Item
-  action
-  active={activeTab === 'wallet'}
-  onClick={() => handleTabChange('wallet')}
->
-  Wallet
-</ListGroup.Item>
-
+              action
+              active={activeTab === 'wallet'}
+              onClick={() => handleTabChange('wallet')}
+            >
+              Wallet
+            </ListGroup.Item>
             <ListGroup.Item action onClick={handleLogout}>
               Logout
             </ListGroup.Item>
@@ -287,14 +352,14 @@ const [transactionAmount, setTransactionAmount] = useState(0);
               <h2>Profile Settings</h2>
               <div className="d-flex">
                 <img
-                  src={userProfile?.avatarUrl}
+                  src={userProfile?.avatarUrl || 'https://via.placeholder.com/100'}
                   alt="Profile"
                   className="profile-avatar me-3"
                   style={{ width: '100px', height: '100px', borderRadius: '50%' }}
                 />
                 <div>
-                  <p>Name: {user?.name}</p>
-                  <p>Email: {user?.email}</p>
+                  <p>Name: {user?.name || 'N/A'}</p>
+                  <p>Email: {user?.email || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -306,39 +371,39 @@ const [transactionAmount, setTransactionAmount] = useState(0);
               {/* Render orders */}
             </div>
           )}
-{activeTab === 'wallet' && (
-  <div>
-    <h2>Wallet</h2>
-    <p>Your wallet balance: ₹{walletBalance || 0}</p>
-    
-    <Form>
-      <Form.Group className="mb-3">
-        <Form.Label>Transaction Amount</Form.Label>
-        <Form.Control
-          type="number"
-          value={transactionAmount}
-          onChange={(e) => setTransactionAmount(parseFloat(e.target.value))}
-        />
-      </Form.Group>
-      
-      <Button variant="success" onClick={handleRazorpayPayment} className="me-2">
-        Add Money via Razorpay
-      </Button>
-      
-      <Button
-        variant="danger"
-        onClick={() => handleWalletAction('debit')}
-        disabled={walletBalance < transactionAmount}
-      >
-        Spend Money
-      </Button>
-    </Form>
-<WalletHistory/>
-  
-  </div>
-)}
 
-
+          {activeTab === 'wallet' && (
+            <div>
+              <h2>Wallet</h2>
+              <p>Your wallet balance: ₹{walletBalance || 0}</p>
+              
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>Transaction Amount</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={transactionAmount}
+                    onChange={(e) => setTransactionAmount(parseFloat(e.target.value))}
+                    min="0"
+                    step="0.01"
+                  />
+                </Form.Group>
+                
+                <Button variant="success" onClick={handleRazorpayPayment} className="me-2">
+                  Add Money via Razorpay
+                </Button>
+                
+                <Button
+                  variant="danger"
+                  onClick={() => handleWalletAction('debit')}
+                  disabled={walletBalance < transactionAmount || transactionAmount <= 0}
+                >
+                  Spend Money
+                </Button>
+              </Form>
+              <WalletHistory />
+            </div>
+          )}
 
           {activeTab === 'addresses' && (
             <div>
@@ -373,25 +438,27 @@ const [transactionAmount, setTransactionAmount] = useState(0);
               </ListGroup>
 
               {/* Pagination Controls */}
-              <Pagination>
-                <Pagination.Prev
-                  disabled={currentPage === 1}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                />
-                {[...Array(totalPages)].map((_, index) => (
-                  <Pagination.Item
-                    key={index}
-                    active={index + 1 === currentPage}
-                    onClick={() => handlePageChange(index + 1)}
-                  >
-                    {index + 1}
-                  </Pagination.Item>
-                ))}
-                <Pagination.Next
-                  disabled={currentPage === totalPages}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                />
-              </Pagination>
+              {totalPages > 1 && (
+                <Pagination className="mt-3">
+                  <Pagination.Prev
+                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                  />
+                  {[...Array(totalPages)].map((_, index) => (
+                    <Pagination.Item
+                      key={index}
+                      active={index + 1 === currentPage}
+                      onClick={() => handlePageChange(index + 1)}
+                    >
+                      {index + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next
+                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                  />
+                </Pagination>
+              )}
             </div>
           )}
         </Col>
@@ -411,6 +478,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="fullname"
                 value={addressForm.fullname}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -420,6 +488,8 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="phone"
                 value={addressForm.phone}
                 onChange={handleFormChange}
+                pattern="[0-9]{10}"
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -429,6 +499,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="street"
                 value={addressForm.street}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -438,6 +509,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="city"
                 value={addressForm.city}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -447,6 +519,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="state"
                 value={addressForm.state}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -456,6 +529,8 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="zip"
                 value={addressForm.zip}
                 onChange={handleFormChange}
+                pattern="[0-9]{6}"
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
@@ -465,6 +540,7 @@ const [transactionAmount, setTransactionAmount] = useState(0);
                 name="country"
                 value={addressForm.country}
                 onChange={handleFormChange}
+                required
               />
             </Form.Group>
           </Form>

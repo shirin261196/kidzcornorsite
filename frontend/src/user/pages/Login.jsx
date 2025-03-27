@@ -6,17 +6,20 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, logout, selectIsAuthenticated } from "../../redux/slices/authSlice";
 import Swal from "sweetalert2";
-import {fetchUserProfile} from "../../redux/slices/userSlice";
+import { fetchUserProfile } from "../../redux/slices/userSlice";
+
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated); // Check if user is already authenticated
-  const backendUrl = "https://d81b-2405-201-f018-f0ba-b00e-df89-2fab-fee2.ngrok-free.app";
-
 
   const token = useSelector((state) => state.auth.token);
-console.log("Token in Redux state:", token); // Should print the token
+  console.log("Token in Redux state:", token); // Should print the token
 
   const {
     register,
@@ -28,7 +31,7 @@ console.log("Token in Redux state:", token); // Should print the token
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-  
+
     if (storedToken && storedUser) {
       try {
         const user = JSON.parse(storedUser); // Safely parse
@@ -43,8 +46,6 @@ console.log("Token in Redux state:", token); // Should print the token
       dispatch(logout()); // No valid data, log out
     }
   }, [dispatch]);
-    
-    
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -52,13 +53,14 @@ console.log("Token in Redux state:", token); // Should print the token
     }
   }, [isAuthenticated, navigate]);
 
-
   useEffect(() => {
     const initializeGoogleSignIn = () => {
       /* global google */
       google.accounts.id.initialize({
         client_id: "1063960380483-r5rjuccv61c7pel45o2q864ijbo45t2v.apps.googleusercontent.com",
         callback: handleGoogleResponse,
+        // Add redirect_uri for production (optional, depending on your backend setup)
+        redirect_uri: 'https://www.mykidzcornor.info', // Update to your frontend domain
       });
       google.accounts.id.renderButton(document.getElementById("google-signin-button"), {
         theme: "outline",
@@ -70,7 +72,7 @@ console.log("Token in Redux state:", token); // Should print the token
 
   const handleGoogleResponse = async (response) => {
     try {
-      const result = await axios.post(`${backendUrl}/google-login`, {
+      const result = await axios.post(`${API_URL}/google-login`, {
         token: response.credential,
       });
       console.log("Response from backend:", result);
@@ -86,18 +88,17 @@ console.log("Token in Redux state:", token); // Should print the token
         toast.error(result.data.message || "Google Sign-In failed or your account is blocked by the admin");
       }
     } catch (error) {
+      console.error("Google Sign-In error:", error);
       toast.error("Error during Google Sign-In");
     }
   };
 
-  
-
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${backendUrl}/login`, data);
-  
+      const response = await axios.post(`${API_URL}/login`, data);
+
       console.log("Response from server:", response); // Debugging
-    console.log("Response Data:", response.data); 
+      console.log("Response Data:", response.data);
       if (response?.status === 403 && response?.data?.userBlocked) {
         Swal.fire({
           icon: "error",
@@ -107,12 +108,11 @@ console.log("Token in Redux state:", token); // Should print the token
       } else if (response?.data?.success) {
         const { token, user } = response.data;
         localStorage.setItem('token', token); // Store token in localStorage
-        localStorage.setItem('user', JSON.stringify(user)); 
-        console.log(token)
-      
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log(token);
+
         dispatch(loginSuccess({ token, user }));
-  
-        dispatch(fetchUserProfile()); // Missing closing bracket was here
+        dispatch(fetchUserProfile());
         toast.success("Login successful!");
         navigate("/", { replace: true });
       } else {
@@ -120,7 +120,7 @@ console.log("Token in Redux state:", token); // Should print the token
       }
     } catch (error) {
       console.error("Caught error:", error);
-  
+
       if (error.response) {
         if (error.response.status === 403 && error.response.data?.userBlocked) {
           Swal.fire({
@@ -136,7 +136,6 @@ console.log("Token in Redux state:", token); // Should print the token
       }
     }
   };
-  
 
   return (
     <div
@@ -192,10 +191,9 @@ console.log("Token in Redux state:", token); // Should print the token
             </Link>
           </p>
           <p>
-          <Link to="/forgot-password" className="text-primary">
-  Forgot Password?
-</Link>
-
+            <Link to="/forgot-password" className="text-primary">
+              Forgot Password?
+            </Link>
           </p>
         </div>
       </div>
