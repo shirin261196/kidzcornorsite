@@ -11,24 +11,36 @@ const WalletHistory = () => {
   useEffect(() => {
     fetchWalletHistory();
   }, [page]);
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
 
-  const fetchWalletHistory = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`http://localhost:4000/user/wallet/details?page=${page}&limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setWalletHistory(response.data.transactions);
-      setTotalTransactions(response.data.totalTransactions);
-    } catch (error) {
-      console.error("Error fetching wallet history:", error);
-    } finally {
-      setLoading(false);
+const fetchWalletHistory = async () => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error('Authentication token not found. Please log in.');
     }
-  };
 
+    const response = await axios.get(`${API_URL}/user/wallet/details?page=${page}&limit=5`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.data.success) {
+      setWalletHistory(response.data.transactions || []);
+      setTotalTransactions(response.data.totalTransactions || 0);
+    } else {
+      throw new Error(response.data.message || 'Failed to fetch wallet history.');
+    }
+  } catch (error) {
+    console.error("Error fetching wallet history:", error.response?.data || error.message);
+    toast.error(error.message || 'Error fetching wallet history. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <Container className="mt-4">
       <Row className="justify-content-center">

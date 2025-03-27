@@ -16,36 +16,61 @@ const TopTen = () => {
     fetchBestSellers();
   }, []);
 
-  const fetchBestSellers = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+// Define the base URL for API calls
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.mykidzcornor.info'
+  : 'http://localhost:4000'; // Use localhost for local development
 
-      const { data: productData } = await axios.get(
-        "http://localhost:4000/products/best-selling-products",
-        config
-      );
-      setBestProducts(productData.topProducts);
-
-      const { data: categoryData } = await axios.get(
-        "http://localhost:4000/products/best-selling-categories",
-        config
-      );
-      setBestCategories(categoryData.topCategories);
-
-      const { data: brandData } = await axios.get(
-        "http://localhost:4000/products/best-selling-brands",
-        config
-      );
-      setBestBrands(brandData.topBrands);
-    } catch (error) {
-      console.error("Error fetching best sellers:", error);
+const fetchBestSellers = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error('Authentication token not found. Please log in.');
     }
-  };
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    // Fetch best-selling products
+    const { data: productData } = await axios.get(
+      `${API_URL}/products/best-selling-products`,
+      config
+    );
+    if (productData.success) {
+      setBestProducts(productData.topProducts || []);
+    } else {
+      throw new Error(productData.message || 'Failed to fetch best-selling products.');
+    }
+
+    // Fetch best-selling categories
+    const { data: categoryData } = await axios.get(
+      `${API_URL}/products/best-selling-categories`,
+      config
+    );
+    if (categoryData.success) {
+      setBestCategories(categoryData.topCategories || []);
+    } else {
+      throw new Error(categoryData.message || 'Failed to fetch best-selling categories.');
+    }
+
+    // Fetch best-selling brands
+    const { data: brandData } = await axios.get(
+      `${API_URL}/products/best-selling-brands`,
+      config
+    );
+    if (brandData.success) {
+      setBestBrands(brandData.topBrands || []);
+    } else {
+      throw new Error(brandData.message || 'Failed to fetch best-selling brands.');
+    }
+  } catch (error) {
+    console.error("Error fetching best sellers:", error.response?.data || error.message);
+    toast.error(error.message || 'Error fetching best sellers. Please try again.');
+  }
+};
 
   const categoryImages = {
     boys: assets.boyfashion,
