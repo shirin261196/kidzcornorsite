@@ -4,6 +4,7 @@ import '../../styles/topTen.css';
 import { Button, Card, Container } from "react-bootstrap";
 import ProductItem from "./ProductItem";
 import { assets } from "../../assets/assets.js";
+import { toast } from "react-toastify";
 
 const TopTen = () => {
   const [bestProducts, setBestProducts] = useState([]);

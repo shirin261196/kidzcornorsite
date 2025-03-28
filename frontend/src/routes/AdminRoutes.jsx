@@ -1,17 +1,17 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
-import AdminLayout from "../admin/components/AdminLayout";
-import List from "../admin/pages/List";
-import Add from "../admin/pages/Add";
 
-import Users from "../admin/pages/Users";
+import List from "../admin/pages/List.jsx";
+import Add from "../admin/pages/Add.jsx";
+import AdminLayout from "../admin/components/Adminlayout.jsx"
+import Users from "../admin/pages/Users.jsx";
 import Category from "../admin/pages/Category";
-import EditProduct from "../admin/pages/EditProduct";
-import AdminStockManagement from "../admin/pages/Stock";
-import AdminOrderManagement from "../admin/pages/Orders";
-import ProductDetails from "../admin/pages/Productdetails";
-import ViewOrder from "../admin/pages/ViewOrder";
+import EditProduct from "../admin/pages/EditProduct.jsx";
+import AdminStockManagement from "../admin/pages/Stock.jsx";
+import AdminOrderManagement from "../admin/pages/Orders.jsx";
+import ProductDetails from "../admin/pages/Productdetails.jsx";
+import ViewOrder from "../admin/pages/ViewOrder.jsx";
 import OfferManagement from "../admin/pages/Offers";
 import CouponManagement from "../admin/pages/Coupon";
 import SalesReport from "../admin/pages/SalesReport";
