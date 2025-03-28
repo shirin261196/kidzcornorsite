@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { backendUrl } from '../../App';
+
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
@@ -76,7 +76,7 @@ const CategoryManagement = () => {
     
         try {
             const response = await axios.post(
-                `${backendUrl}/admin/category`,
+                `${API_URL}/admin/category`,
                 { name: trimmedName, description: trimmedDescription }, // Save trimmed values
                 { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` } }
             );
