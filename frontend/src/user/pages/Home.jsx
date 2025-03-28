@@ -3,7 +3,7 @@ import Hero from '../components/Hero';
 import LatestColection from '../components/LatestColection';
 import BestSeller from '../components/BestSeller';
 import OurPolicy from '../components/OurPolicy';
-import TopTen from '../components/topTen';
+import TopTen from '../components/TopTen';
 
 const Home = () => {
   // Sample data (replace this with actual data from your API or state)
