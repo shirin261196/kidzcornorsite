@@ -3,18 +3,20 @@ import userModel from './models/userModel.js';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 
-const client = new OAuth2Client('1063960380483-r5rjuccv61c7pel45o2q864ijbo45t2v.apps.googleusercontent.com');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const allowedOrigins = [
     'http://localhost:5173', // Development frontend
     'http://localhost:5174', // Development frontend (if needed)
     'https://mykidzcornor.info', // Production frontend
   ];
+  
 
 export default (app) => {
     app.use(cors({
         origin: (origin, callback) => {
             if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, origin); // Allow the origin
+                callback(null, true); // Allow the origin
             } else {
                 callback(new Error('Not allowed by CORS')); // Block the origin
             }
