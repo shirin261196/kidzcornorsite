@@ -41,23 +41,50 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173', // Development frontend
   'http://localhost:5174', // Development frontend (if needed)
+ 'https://mykidzcornor.info',
   'https://www.mykidzcornor.info', // Production frontend
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
+console.log(`Request Origin: ${origin}`); // Log the origin for debugging
+    console.log(`Allowed Origins: ${allowedOrigins}`);
     if (!origin) {
       // Allow requests without an origin (e.g., Postman or server-to-server calls)
       return callback(null, true);
     }
     if (allowedOrigins.includes(origin)) {
+console.log(`Origin ${origin} is allowed`);
       callback(null, origin); // Reflect the origin in the response
     } else {
+console.warn(`🚨 CORS Blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true, // Allow credentials like cookies and tokens
+ methods  ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], // Allow common HTTP methods
+  allowedHeaders: ['Content-Type,Authorization'], 
 }));
+
+// Explicitly handle CORS preflight requests for all routes
+app.options('*', cors({
+  origin: (origin, callback) => {
+    console.log(`Handling OPTIONS request from origin: ${origin}`);
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      console.warn(`🚨 CORS Blocked: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
