@@ -9,7 +9,7 @@ import {
   setDiscountAmount
 } from '../../redux/slices/cartSlice.js';
 import { selectUserId } from '../../redux/slices/authSlice';
-import { currency } from '../../App.jsx';
+import { API_URL, currency } from '../../App.jsx';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -86,7 +86,7 @@ const CartPage = () => {
     const fetchOffers = async () => {
       const token = localStorage.getItem('adminToken');
       try {
-        const response = await axios.get('http://localhost:4000/admin/offers', {
+        const response = await axios.get(`${API_URL}/admin/offers`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -116,7 +116,7 @@ const handleApplyOffer = async () => {
 
   try {
     const response = await axios.post(
-      'http://localhost:4000/user/cart/apply-offer',
+      `${API_URL}/user/cart/apply-offer`,
       { userId, offerId: selectedOffer },
       {
         headers: {
@@ -157,7 +157,7 @@ const handleApplyOffer = async () => {
     }
 console.log('couponcode',couponCode);
     // Example of coupon validation logic (replace with your real logic)
-    axios.post('http://localhost:4000/user/cart/apply-coupon', { userId, couponCode })
+    axios.post(`${API_URL}/user/cart/apply-coupon`, { userId, couponCode })
     .then(response => {
       console.log('Response:', response.data);
    
@@ -196,7 +196,7 @@ console.log('couponcode',couponCode);
   const handleRemoveOffer = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:4000/user/cart/remove-offer",
+        `${API_URL}/user/cart/remove-offer`,
         { userId },
         {
           headers: {
@@ -220,7 +220,7 @@ console.log('couponcode',couponCode);
   const handleRemoveCoupon = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:4000/user/cart/remove-coupon",
+      `${API_URL}/user/cart/remove-coupon`,
       { userId },
       {
         headers: {

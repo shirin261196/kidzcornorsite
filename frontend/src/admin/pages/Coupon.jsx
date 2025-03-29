@@ -11,7 +11,7 @@ const CouponManagement = () => {
   const dispatch = useDispatch();
   const API_URL = process.env.NODE_ENV === 'production'
   ? 'https://api.mykidzcornor.info'
-  : 'http://localhost:4000';
+  : 'http://localhost:5001';
 
   const { products, loading: productsLoading, error: productsError } = useSelector((state) => state.products);
   const { categories, loading: categoriesLoading, error: categoriesError } = useSelector((state) => state.categories);

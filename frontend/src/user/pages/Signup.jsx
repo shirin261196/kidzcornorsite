@@ -43,24 +43,29 @@ const SignUp = () => {
   // Define the base URL for API calls
 const API_URL = process.env.NODE_ENV === 'production'
 ? 'https://api.mykidzcornor.info'
-: 'http://localhost:4000'; // Use localhost for local development
+: 'http://localhost:5001'; // Use localhost for local development
 
 const onSubmit = async (data) => {
-const { name, email, password } = data;
-try {
-  const response = await axios.post(`${API_URL}/register`, { name, email, password });
-  if (response.data.success) {
-    setIsOtpSent(true);
-    setUserId(response.data.userId);
-    setCountdown(60);
-    toast.success('OTP sent to your email. Please verify.');
-  } else {
-    toast.error(response.data.message || 'Registration failed.');
+  const { name, email, password } = data;
+  try {
+    // Send the registration request and await the response
+    const response = await axios.post(`${API_URL}/register`, { name, email, password }, { withCredentials: true , headers: {
+      "Content-Type": "application/json"
+  }});
+
+    // Check if registration was successful
+    if (response.data.success) {
+      setIsOtpSent(true);
+      setUserId(response.data.userId);
+      setCountdown(60);
+      toast.success('OTP sent to your email. Please verify.');
+    } else {
+      toast.error(response.data.message || 'Registration failed.');
+    }
+  } catch (error) {
+    console.error("Registration Error:", error.response?.data || error.message);
+    toast.error(error.response?.data?.message || 'Error occurred while registering.');
   }
-} catch (error) {
-  console.error("Registration Error:", error.response?.data || error.message);
-  toast.error(error.response?.data?.message || 'Error occurred while registering.');
-}
 };
 
 const handleVerifyOtp = async (e) => {

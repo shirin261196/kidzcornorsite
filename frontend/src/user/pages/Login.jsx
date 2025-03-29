@@ -11,7 +11,7 @@ import { fetchUserProfile } from "../../redux/slices/userSlice";
 // Define the base URL for API calls
 const API_URL = process.env.NODE_ENV === 'production'
   ? 'https://api.mykidzcornor.info'
-  : 'http://localhost:4000'; // Use localhost for local development
+  : 'http://localhost:5001'; // Use localhost for local development
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -60,7 +60,7 @@ const Login = () => {
         client_id: "1063960380483-r5rjuccv61c7pel45o2q864ijbo45t2v.apps.googleusercontent.com",
         callback: handleGoogleResponse,
         // Add redirect_uri for production (optional, depending on your backend setup)
-        redirect_uri: 'https://www.mykidzcornor.info', // Update to your frontend domain
+        redirect_uri: 'https://mykidzcornor.info', // Update to your frontend domain
       });
       google.accounts.id.renderButton(document.getElementById("google-signin-button"), {
         theme: "outline",
@@ -95,7 +95,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${API_URL}/login`, data);
+      const response = await axios.post(`${API_URL}/login`, data,{withCredentials:true});
 
       console.log("Response from server:", response); // Debugging
       console.log("Response Data:", response.data);

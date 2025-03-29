@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production'
   ? 'https://api.mykidzcornor.info'
-  : 'http://localhost:4000'; 
+  : 'http://localhost:5001'; 
 
 export const fetchWalletBalance = createAsyncThunk(
   'wallet/fetchWalletBalance',

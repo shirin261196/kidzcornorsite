@@ -38,7 +38,7 @@ const AddProduct = () => {
   // Define the base URL for API calls
   const API_URL = process.env.NODE_ENV === 'production'
   ? 'https://api.mykidzcornor.info'
-  : 'http://localhost:4000';
+  : 'http://localhost:5001';
 
   // Fetch categories
   useEffect(() => {
