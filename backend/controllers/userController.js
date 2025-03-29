@@ -63,6 +63,10 @@ console.log("Password validation result:", isPasswordValid);
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: "Name, email, and password are required" });
+    }
 
     // Check if user already exists
     const existingUser = await userModel.findOne({ email });

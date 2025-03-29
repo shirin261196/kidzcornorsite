@@ -7,7 +7,7 @@ const client = new OAuth2Client('1063960380483-r5rjuccv61c7pel45o2q864ijbo45t2v.
 const allowedOrigins = [
     'http://localhost:5173', // Development frontend
     'http://localhost:5174', // Development frontend (if needed)
-    'https://www.mykidzcornor.info', // Production frontend
+    'https://mykidzcornor.info', // Production frontend
   ];
 
 export default (app) => {
