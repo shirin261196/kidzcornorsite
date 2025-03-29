@@ -63,7 +63,7 @@ console.warn(`🚨 CORS Blocked: ${origin}`);
   },
   credentials: true, // Allow credentials like cookies and tokens
  methods : ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], // Allow common HTTP methods
-  allowedHeaders: ['Content-Type,Authorization'], 
+  allowedHeaders: ['Content-Type','Authorization'], 
 }));
 
 // Explicitly handle CORS preflight requests for all routes
