@@ -40,9 +40,8 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173', // Development frontend
-  'http://localhost:5174', // Development frontend (if needed)
- 'https://mykidzcornor.info',
-  'https://www.mykidzcornor.info', // Production frontend
+ 'https://mykidzcornor.info',   // Production frontend
+  'https://www.mykidzcornor.info'// Production frontend
 ];
 
 app.use(cors({
@@ -51,7 +50,7 @@ app.use(cors({
 
     if (!origin || allowedOrigins.includes(origin)) {
       console.log(`✅ Allowed: ${origin}`);
-      return callback(null, true);
+      return callback(null, origin);
     }
     
     console.warn(`🚨 CORS Blocked: ${origin}`);

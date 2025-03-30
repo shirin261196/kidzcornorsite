@@ -307,7 +307,11 @@ export const addAddress = async (req, res, next) => {
       user.addresses.push(newAddress);
       await user.save();
 
-      res.status(201).json(newAddress);
+      res.status(201).json({
+        success: true,
+        message: "Address added successfully",
+        address: newAddress
+    });
   } catch (error) {
       next(error);
   }
