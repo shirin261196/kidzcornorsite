@@ -320,7 +320,7 @@ export const bestSeller = async (req, res,next) => {
       },
     ]);
 
-    res.json({ topProducts });
+    res.json({ success: true,topProducts });
   } catch (error) {
    next(error)
   }
@@ -367,7 +367,7 @@ export const bestCategory = async (req, res, next) => {
       },
     ]);
 
-    res.json({ topCategories });
+    res.json({ success: true,topCategories });
   } catch (error) {
     next(error);
   }
@@ -404,7 +404,7 @@ export const bestBrand = async (req, res,next) => {
       },
     ]);
 
-    res.json({ topBrands });
+    res.json({ success: true,topBrands });
   } catch (error) {
     next(error)
   }
