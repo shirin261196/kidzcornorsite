@@ -166,6 +166,7 @@ export const debitWallet = async (req, res, next) => {
         .slice((page - 1) * limit, page * limit);
   
       res.status(200).json({
+        success:true,
         walletBalance: user.walletBalance,
         transactions,
       });
