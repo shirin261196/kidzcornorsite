@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:4000/api' }); // Replace with your backend URL
+const API = axios.create({ baseURL: 'http://localhost:5001/api' }); // Replace with your backend URL
 
 export const fetchReport = (filters) => API.post('/reports/generate', filters);
 export const downloadPDF = (data) =>
