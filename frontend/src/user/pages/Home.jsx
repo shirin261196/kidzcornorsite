@@ -3,7 +3,8 @@ import Hero from '../components/Hero';
 import LatestColection from '../components/LatestColection';
 import BestSeller from '../components/BestSeller';
 import OurPolicy from '../components/OurPolicy';
-import TopTen from '../components/TopTen';
+import BestProducts from '../components/BestProducts';
+
 
 const Home = () => {
   // Sample data (replace this with actual data from your API or state)
@@ -20,7 +21,7 @@ const Home = () => {
         <BestSeller items={bestSellerData} />
       </div>
       <div className="mb-5">
-        <TopTen />
+        <BestProducts />
       </div>
       <OurPolicy />
     </div>

@@ -5,6 +5,7 @@ import 'cropperjs/dist/cropper.css';
 import { toast } from 'react-toastify';
 import { useForm, Controller } from 'react-hook-form';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { API_URL } from '../../App';
 
 const AddProduct = () => {
   const [categories, setCategories] = useState([]);
@@ -35,10 +36,6 @@ const AddProduct = () => {
     },
   });
 
-  // Define the base URL for API calls
-  const API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://api.mykidzcornor.info'
-  : 'http://localhost:5001';
 
   // Fetch categories
   useEffect(() => {
@@ -156,9 +153,10 @@ const AddProduct = () => {
     imageFiles.forEach((file, index) => {
       formData.append(`image${index + 1}`, file);
     });
+    console.log("API_URL:", API_URL);
 
     try {
-      const response = await axios.post('http://localhost:4000/admin/products/add', formData, {
+      const response = await axios.post(`${API_URL}/admin/products/add`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

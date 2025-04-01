@@ -6,7 +6,7 @@ import ProductItem from "./ProductItem.jsx";
 import { assets } from "../../assets/assets.js";
 import { toast } from "react-toastify";
 
-const TopTen = () => {
+const BestProducts = () => {
   const [bestProducts, setBestProducts] = useState([]);
   const [bestCategories, setBestCategories] = useState([]);
   const [bestBrands, setBestBrands] = useState([]);
@@ -193,4 +193,4 @@ const fetchBestSellers = async () => {
   );
 };
 
-export default TopTen;
+export default BestProducts;

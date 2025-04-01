@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Button, Container, Spinner, Row, Col, Card } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 const WalletHistory = () => {
   const [walletHistory, setWalletHistory] = useState([]);

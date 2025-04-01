@@ -38,7 +38,7 @@ export const addAddress = createAsyncThunk(
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Authentication token not found. Please log in.');
+        return rejectWithValue('Authentication token not found. Please log in.');
       }
 
       const response = await axios.post(`${API_URL}/user/address`, addressData, {
@@ -47,16 +47,16 @@ export const addAddress = createAsyncThunk(
         },
       });
 
-      if (response.data.success) {
-        return response.data.address;
-      } else {
-        throw new Error(response.data.message || 'Failed to add address.');
-      }
+      console.log("API Response:", response.data); // Debugging
+
+      return response.data; // Directly return response data instead of checking .success
     } catch (error) {
-      return rejectWithValue(error.message || 'Failed to add address.');
+      console.error("API Error:", error);
+      return rejectWithValue(error.response?.data?.message || 'Failed to add address.');
     }
   }
 );
+
 
 export const updateAddress = createAsyncThunk(
   'address/updateAddress',
