@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
      "deploy": "npm run build && gh-pages -d dist",
-     "start": "PORT=3000 react-scripts start"
+     "start": "PORT=5001 react-scripts start"
 
   },
   "dependencies": {

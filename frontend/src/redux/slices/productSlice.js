@@ -19,7 +19,7 @@ export const fetchProducts = createAsyncThunk('products/fetchProducts', async ()
     throw new Error(data.message || 'Failed to fetch products');
   }
 
-  return data.products; // Ensure we return only the array
+  return data.products.filter((p) => !p.deleted); // Ensure we return only the array
 });
 
 const productSlice = createSlice({
