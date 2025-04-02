@@ -87,7 +87,7 @@ export const getProductById = async (req, res, next) => {
     }
 
     // Populate the 'category' field with category details
-    const product = await productModel.findById(id).populate('category');
+    const product = await productModel.findOne({ _id: id, deleted: false }).populate('category');
 
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -150,13 +150,13 @@ export const restoreProduct = async(req,res,next) =>{
 export const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, price, brand, stock, category, sizes } = req.body;
+    const { name, price, brand, stock, description,category, sizes } = req.body;
 
     // Parse sizes if sent as a string (e.g., from formData)
     const parsedSizes = Array.isArray(sizes) ? sizes : JSON.parse(sizes || "[]");
 
     // Prepare update fields for non-array properties
-    const updateFields = { name, price, brand,category };
+    const updateFields = { name, price, brand,category,description };
 
     // Handle uploaded images
     if (req.files && req.files.length > 0) {
