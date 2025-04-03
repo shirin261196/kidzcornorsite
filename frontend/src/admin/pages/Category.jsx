@@ -109,7 +109,7 @@ const CategoryManagement = () => {
         if (result.isConfirmed) {
             try {
                 const response = await axios.put(
-                    `${{API_URL}}/admin/category/${id}/delete`,
+                    `${API_URL}/admin/category/${id}/delete`,
                     { isDeleted: true },
                     { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
                 );
@@ -140,7 +140,7 @@ const CategoryManagement = () => {
         if (result.isConfirmed) {
             try {
                 const response = await axios.put(
-                    `${{API_URL}}/admin/category/${id}/restore`,
+                    `${API_URL}/admin/category/${id}/restore`,
                     { isDeleted: false },
                     { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
                 );
@@ -176,7 +176,7 @@ const CategoryManagement = () => {
     
         try {
             const response = await axios.put(
-                `${{API_URL}}/admin/category/${editingCategory}`, 
+                `${API_URL}/admin/category/${editingCategory}`, 
                 { ...data, name: trimmedName }, // Save trimmed name
                 { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')} ` } }
             );
