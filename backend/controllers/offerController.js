@@ -15,7 +15,7 @@ export const createProductOffer = async (req, res, next) => {
       expiryDate,
     });
     await offer.save();
-    res.status(201).json({ message: 'Product offer created successfully', offer });
+    res.status(201).json({success:true, message: 'Product offer created successfully', offer });
   } catch (error) {
     next(error);
   }
@@ -42,7 +42,7 @@ export const createProductOffer = async (req, res, next) => {
       });
   
       await offer.save();
-      res.status(201).json({ message: 'Category offer created successfully', offer });
+      res.status(201).json({ success:true,message: 'Category offer created successfully', offer });
     } catch (error) {
       console.error('Error creating category offer:', error);
       next(error); // Pass error to error handling middleware
@@ -60,7 +60,7 @@ export const createProductOffer = async (req, res, next) => {
           offerDescription,
         });
         await offer.save();
-        res.status(201).json({ message: 'Referral offer created successfully', offer });
+        res.status(201).json({ success:true,message: 'Referral offer created successfully', offer });
       } catch (error) {
         next(error);
       }
@@ -72,7 +72,7 @@ export const getOffers = async (req, res, next) => {
       isActive: true,
       expiryDate: { $gte: new Date() },
     });
-    res.status(200).json({ offers });
+    res.status(200).json({ success:true,offers });
   } catch (error) {
     next(error);
   }

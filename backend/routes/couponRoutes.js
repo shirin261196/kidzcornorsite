@@ -1,6 +1,6 @@
 import express from 'express';
 import { adminAuth } from '../middleware/adminAuth.js';
-import { createCoupon, deleteCoupon, getCoupons, updateCoupon } from '../controllers/couponController.js';
+import { createCoupon, deactivateCoupon, deleteCoupon, getCoupons, updateCoupon } from '../controllers/couponController.js';
 import { userAuth } from '../middleware/userAuth.js';
 
 
@@ -13,6 +13,6 @@ couponRouter.delete('/admin/coupon/:couponId', adminAuth,deleteCoupon);
 
 couponRouter.put('/admin/coupon/:id', adminAuth, updateCoupon);
 
-couponRouter.put('/admin/coupon/deactivate/:couponId', adminAuth, updateCoupon);
+couponRouter.put('/admin/coupon/deactivate/:couponId', adminAuth, deactivateCoupon);
 
 export default couponRouter;

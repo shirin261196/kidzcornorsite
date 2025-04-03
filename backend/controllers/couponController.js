@@ -13,7 +13,7 @@ export const createCoupon = async (req, res, next) => {
       
     const coupon = new Coupon({ code, discount, minPurchaseAmount, expiryDate });
     await coupon.save();
-    res.status(201).json({ message: 'Coupon created successfully', coupon });
+    res.status(201).json({ success:true,message: 'Coupon created successfully', coupon });
   } catch (error) {
     next(error);
   }
@@ -103,19 +103,25 @@ export const updateCoupon = async (req, res,next) => {
      next(error)
     }
   };
-  
+
   export const deactivateCoupon = async (req, res,next) => {
     const { couponId } = req.params;
 
     try {
       const coupon = await Coupon.findById(couponId);
       if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
-  
-      coupon.isActive = false; // Mark coupon as inactive
-      await coupon.save();
-  
-      res.status(200).json({ message: 'Coupon deactivated successfully', coupon });
+    // Toggle the coupon status
+    coupon.isActive = !coupon.isActive;
+    await coupon.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Coupon ${coupon.isActive ? 'activated' : 'deactivated'} successfully`, 
+      coupon 
+    });
+
     } catch (error) {
       next(error);
     }
   }
+  
