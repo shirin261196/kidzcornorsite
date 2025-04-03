@@ -266,15 +266,18 @@ const CategoryManagement = () => {
                             <td>{index + 1}</td>
                             <td>
                                 {editingCategory === category._id ? (
+                                    <>
                                     <input
                                     type="text"
                                     className="form-control"
                                     {...registerEdit("name", { required: "Category name is required" })}
                                 />
+                                {editErrors.name && <p className="text-danger">{editErrors.name.message}</p>}
+                            </>
                                 ) : (
                                     category.name
                                 )}
-                                {editErrors.name && <p className="text-danger">{editErrors.name.message}</p>}
+                                
                             </td>
                             <td>
     {editingCategory === category._id ? (
