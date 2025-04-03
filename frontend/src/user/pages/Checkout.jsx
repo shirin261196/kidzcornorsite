@@ -68,10 +68,17 @@ const user = useSelector((state) => state.user.user);
 
       if (isEditing) {
         dispatch(updateAddress({ ...addressPayload, addressId: newAddress._id }));
+        dispatch(fetchAddresses(userId));
         toast.success('Address updated successfully!');
       } else {
-        dispatch(addAddress(addressPayload));
-        toast.success('Address added successfully!');
+        dispatch(addAddress(addressPayload)).then((action) => {
+          if (addAddress.fulfilled.match(action)) {
+            dispatch(fetchAddresses(userId));
+            toast.success('Address added successfully!');
+          } else {
+            toast.error('Failed to add address');
+          }
+        });
       }
 
       setShowAddressForm(false);
@@ -89,7 +96,8 @@ const user = useSelector((state) => state.user.user);
       toast.error('Please fill all fields');
     }
   };
-
+ 
+  
   const handleEditAddress = (address) => {
     setIsEditing(true);
     setShowAddressForm(true);
@@ -463,10 +471,10 @@ console.log("UI - Final Price:", finalPrice);
             value={selectedAddress}
             onChange={(e) => setSelectedAddress(e.target.value)}
           >
-            <option>Select Address</option>
-            {addresses.map((address) => (
-              <option key={address._id} value={address._id}>
-                {`${address.fullname}, ${address.street}, ${address.city}, ${address.state}, ${address.zip}, ${address.country}`}
+             <option value="">Select Address</option>
+            {addresses.map((address,index) => (
+            <option key={address?._id || index} value={address?._id}>
+                {`${address.fullname}, ${address.street}, ${address.city}, ${address.state},${address.phone}, ${address.zip}, ${address.country}`}
               </option>
             ))}
           </Form.Select>

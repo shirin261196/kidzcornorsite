@@ -90,6 +90,7 @@ const AdminOrderManagement = () => {
               Authorization: `Bearer ${localStorage.getItem('token')}`, // User token
               AdminAuthorization: `Bearer ${localStorage.getItem('adminToken')}`,
             },
+            withCredentials: true 
           }
         );
 

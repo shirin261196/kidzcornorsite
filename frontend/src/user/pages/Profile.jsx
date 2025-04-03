@@ -161,7 +161,7 @@ const UserProfile = () => {
             });
             const verifyData = verifyResponse.data;
             if (verifyData.success) {
-              dispatch(creditWallet({ userId: user.id, amount: transactionAmount }));
+              // dispatch(creditWallet({ userId: user.id, amount: transactionAmount }));
               Swal.fire('Success', 'Wallet credited successfully.', 'success');
               setTransactionAmount(0);
               dispatch(fetchWalletBalance()); // Refresh wallet balance
