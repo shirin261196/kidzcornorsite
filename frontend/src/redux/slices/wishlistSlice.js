@@ -20,8 +20,8 @@ export const fetchWishlist = createAsyncThunk('wishlist/fetchWishlist', async (u
 export const addToWishlist = createAsyncThunk('wishlist/addToWishlist', async (item, thunkAPI) => {
   try {
     const response = await axios.post(`${API_URL}/user/wishlist/add`, item);
-    console.log(response.data.wishlist)
-    return response.data.wishlist;
+    console.log('Thunk response.data:', response.data); // Debug full response
+    return response.data; // { success, message, wishlist, added }
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
   }
@@ -31,7 +31,7 @@ export const addToWishlist = createAsyncThunk('wishlist/addToWishlist', async (i
 export const removeFromWishlist = createAsyncThunk('wishlist/removeFromWishlist', async (item, thunkAPI) => {
   try {
     const response = await axios.delete(`${API_URL}/user/wishlist/remove`, { data: item });
-    return response.data.wishlist;
+    return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
   }
@@ -74,7 +74,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(addToWishlist.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items || [];
+        state.items = action.payload.wishlist.items || state.items; // Always expect wishlist.items
       })
       .addCase(addToWishlist.rejected, (state, action) => {
         state.loading = false;
@@ -87,7 +87,7 @@ const wishlistSlice = createSlice({
       })
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items || [];
+        state.items = action.payload.wishlist.items || state.items;
       })
       .addCase(removeFromWishlist.rejected, (state, action) => {
         state.loading = false;

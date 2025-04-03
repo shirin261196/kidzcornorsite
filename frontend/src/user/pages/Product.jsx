@@ -46,10 +46,14 @@ const Product = () => {
     if (products.length === 0) {
       dispatch(fetchProducts());
     }
+  
+  }, [dispatch]);
+
+  useEffect(() => {
     if (userId) {
       dispatch(fetchWishlist(userId));
     }
-  }, [dispatch, products, userId]);
+  }, [dispatch, userId]); // Remove wishlistItems
 
   // Fetch product data when the component is mounted
   useEffect(() => {
@@ -68,44 +72,61 @@ const Product = () => {
 
 
   // Toggle wishlist status
-  const handleWishlist = () => {
+  const handleWishlist = async () => {
     const isInWishlist = wishlistItems.some((item) => item.productId === productData._id);
   
-    // Validate selectedSize
     if (!selectedSize) {
       toast.error('Please select a size.');
       return;
     }
   
-    // Find the size data
     const sizeData = productData.sizes.find((size) => size.size === selectedSize);
     if (!sizeData) {
       toast.error('Selected size is not available.');
       return;
     }
   
-    // Toggle wishlist state
     if (isInWishlist) {
-      toast.error('Product is already in Wishlist');
+      await dispatch(removeFromWishlist({ userId, productId: productData._id }));
+      Swal.fire({
+        title: 'Removed!',
+        text: 'Product removed from Wishlist!',
+        icon: 'info',
+        confirmButtonText: 'OK',
+      });
+      await dispatch(fetchWishlist(userId));
       return;
     }
-      dispatch(
-        addToWishlist({
-          userId,
-          productId: productData._id,
-          name: productData.name,
-          price: productData.price,
-          sizes: productData.sizes, // Include sizes
-          images: productData.images.map(img => ({
-            url: img.url, // Extract URL
-            public_id: img.public_id, // Extract public_id
-          })),
-        })
-      );
-      toast.success('Added to Wishlist');
+  
+    const { payload } = await dispatch(
+      addToWishlist({
+        userId,
+        productId: productData._id,
+        name: productData.name,
+        price: productData.price,
+        sizes: productData.sizes,
+        images: productData.images.map(img => ({
+          url: img.url,
+          public_id: img.public_id,
+        })),
+      })
+    );
+    console.log('handleWishlist payload:', payload);
+    if (payload.added === true) {
+      Swal.fire({
+        title: 'Success!',
+        text: 'Product added to Wishlist!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+    } else {
+      toast.error('Product already in wishlist.');
     }
   
-
+    await dispatch(fetchWishlist(userId));
+  };
+  
+  
   
 
   // Add to cart logic with SweetAlert

@@ -98,6 +98,18 @@ const List = () => {
 
   // Restore a deleted product
   const restoreProduct = async (productId) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to restore this product?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, restore it!',
+    });
+  
+    // If user cancels, exit function
+    if (!result.isConfirmed) return;
     try {
       const response = await axios.put(
         `${API_URL}/admin/products/restore/${productId}`,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { selectWishlistItems, removeFromWishlist, setWishlist} from '../../redux/slices/wishlistSlice.js';
+import { selectWishlistItems, removeFromWishlist, setWishlist, fetchWishlist} from '../../redux/slices/wishlistSlice.js';
 import { addToCart } from '../../redux/slices/cartSlice'; // Assuming you have a cart slice
 import { Link } from 'react-router-dom';
 import { currency } from '../../App';
@@ -20,12 +20,18 @@ const WishlistPage = () => {
 
   // Sync the wishlist to localStorage whenever it changes
   useEffect(() => {
-    if (wishlist.length > 0) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    if (userId) {
+      dispatch(fetchWishlist(userId));
     }
-  }, [wishlist]);
+  }, [dispatch, userId]);
+
   useEffect(() => {
     console.log("Wishlist items:", wishlist);
+    if (wishlist.length > 0) {
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    } else {
+      localStorage.removeItem('wishlist');
+    }
   }, [wishlist]);
   
 
@@ -37,7 +43,6 @@ const WishlistPage = () => {
       dispatch(setWishlist(parsedWishlist));
     }
   }, [dispatch]);
-
   const handleRemoveFromWishlist = (product) => {
     Swal.fire({
       title: 'Are you sure?',
@@ -48,10 +53,20 @@ const WishlistPage = () => {
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Yes, remove it!',
       cancelButtonText: 'Cancel',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        dispatch(removeFromWishlist({ userId, productId: product.productId }));
-        toast.success('Product removed from wishlist');
+        console.log('Removing productId:', product.productId._id, 'for userId:', userId);
+        const removeAction = await dispatch(removeFromWishlist({ userId, productId: product.productId._id }));
+        if (removeFromWishlist.fulfilled.match(removeAction)) {
+          const fetchAction = await dispatch(fetchWishlist(userId));
+          if (fetchWishlist.fulfilled.match(fetchAction)) {
+            toast.success('Product removed from wishlist');
+          } else {
+            toast.error('Failed to fetch updated wishlist');
+          }
+        } else {
+          toast.error('Failed to remove product from wishlist');
+        }
       }
     });
   };
