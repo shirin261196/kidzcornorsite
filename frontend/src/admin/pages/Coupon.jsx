@@ -103,7 +103,7 @@ const CouponManagement = () => {
       });
   
       Swal.fire('Success', 'Coupon created successfully!', 'success');
-      fetchCoupons(); // Re-fetch coupons to reflect the changes
+    // Re-fetch coupons to reflect the changes
       couponReset();
     } catch (error) {
       console.error('Error creating coupon:', error.response?.data || error.message);
@@ -114,6 +114,14 @@ const CouponManagement = () => {
   // Handle Offer Form Submission
   const handleOfferSubmit = async (data) => {
     try {
+          // Validate the expiry date
+    const today = new Date();
+    const expiryDate = new Date(data.offerExpiryDate);
+
+    if (expiryDate < today) {
+      Swal.fire('Error', 'Expiry date must be in the future.', 'error');
+      return;
+    }
       const adminToken = localStorage.getItem('adminToken');
       if (!adminToken) {
         throw new Error('Admin token not found. Please log in.');
@@ -124,7 +132,7 @@ const CouponManagement = () => {
         offerCode: data.offerCode,
         offerDescription: data.offerDescription,
         discount: data.offerDiscount,
-        expiryDate: new Date(data.offerExpiryDate),
+        expiryDate: expiryDate,
       };
   
       // Add the productId or categoryId depending on the offer type
@@ -148,7 +156,7 @@ const CouponManagement = () => {
       });
   
       offerReset();
-      fetchOffers(); // Re-fetch offers to reflect the changes
+      // Re-fetch offers to reflect the changes
       Swal.fire('Success', 'Offer created successfully!', 'success');
     } catch (error) {
       console.error('Error creating offer:', error.response?.data || error.message);
@@ -219,35 +227,44 @@ const CouponManagement = () => {
   };
   
   // Handle Deactivate Coupon
-  const handleDeactivateCoupon = async (couponId) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This coupon will be deactivated!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, deactivate it!',
-      cancelButtonText: 'Cancel',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const adminToken = localStorage.getItem('adminToken');
-          if (!adminToken) {
-            throw new Error('Admin token not found. Please log in.');
-          }
+ // Handle Toggle Coupon Status
+const handleToggleCoupon = async (couponId, isActive) => {
+  console.log(`Attempting to ${isActive ? 'deactivate' : 'activate'} coupon with ID:`, couponId);
   
-          await axios.put(`${API_URL}/admin/coupon/deactivate/${couponId}`, {}, {
-            headers: { Authorization: `Bearer ${adminToken}` },
-          });
-  
-          Swal.fire('Deactivated!', 'Coupon has been deactivated.', 'success');
-          fetchCoupons(); // Re-fetch coupons to reflect the changes
-        } catch (error) {
-          console.error('Error deactivating coupon:', error.response?.data || error.message);
-          Swal.fire('Error', error.response?.data?.message || 'Error deactivating coupon.', 'error');
+  Swal.fire({
+    title: 'Are you sure?',
+    text: `This coupon will be ${isActive ? 'deactivated' : 'activated'}!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: `Yes, ${isActive ? 'deactivate' : 'activate'} it!`,
+    cancelButtonText: 'Cancel',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+          throw new Error('Admin token not found. Please log in.');
         }
+
+        await axios.put(`${API_URL}/admin/coupon/deactivate/${couponId}`, {}, {
+          headers: { Authorization: `Bearer ${adminToken}` },
+        });
+
+        Swal.fire(
+          isActive ? 'Deactivated!' : 'Activated!',
+          `Coupon has been ${isActive ? 'deactivated' : 'activated'}.`,
+          'success'
+        );
+
+        fetchCoupons(); // Refresh coupon list
+      } catch (error) {
+        console.error('Error updating coupon:', error.response?.data || error.message);
+        Swal.fire('Error', error.response?.data?.message || 'Error updating coupon.', 'error');
       }
-    });
-  };
+    }
+  });
+};
+
   // React Hook Form initialization for Coupon Form
 
 const { register: couponRegister, handleSubmit: couponHandleSubmit, formState: couponFormState, reset: couponReset } = useForm();
@@ -344,14 +361,13 @@ const { register: offerRegister, handleSubmit: offerHandleSubmit, formState: off
                       >
                         Delete
                       </Button>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        className="ml-2"
-                        onClick={() => handleDeactivateCoupon(coupon._id || coupon.id)}
-                      >
-                        Deactivate
-                      </Button>
+                      <button 
+  onClick={() => handleToggleCoupon(coupon._id, coupon.isActive)} 
+  className={`btn ${coupon.isActive ? 'btn-danger' : 'btn-success'}`}
+>
+  {coupon.isActive ? 'Deactivate' : 'Activate'}
+</button>
+
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
