@@ -536,7 +536,7 @@ export const processRefund = async (req, res, next) => {
         balanceAfterTransaction: user.walletBalance,
       });
 
-    res.status(200).json({
+    res.status(200).json({success:true,
       message: 'Refund processed successfully and credited to wallet.',
       updatedOrder: order,
       walletBalance: user.walletBalance,

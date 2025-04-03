@@ -306,11 +306,11 @@ export const addAddress = async (req, res, next) => {
       const newAddress = { fullname, phone, street, city, state, country, zip };
       user.addresses.push(newAddress);
       await user.save();
-
+      const savedAddress = user.addresses[user.addresses.length - 1];
       res.status(201).json({
         success: true,
         message: "Address added successfully",
-        address: newAddress
+        address: savedAddress
     });
   } catch (error) {
       next(error);
@@ -401,7 +401,7 @@ export const fetchAllAddress = async(req,res,next)=>{
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
    // Check if the address exists
-   res.status(200).json(user.addresses);
+   res.status(200).json({ success: true, addresses: user.addresses });
    
   } catch (error) {
     next(error)
