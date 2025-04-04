@@ -41,7 +41,7 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${API_URL}/admin/category`, {
+        const response = await axios.get(`${API_URL}/admin/category/active`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
           },
