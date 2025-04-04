@@ -82,45 +82,48 @@ export const createOrder = async (req, res, next) => {
 
     // **Wallet Payment Handling**
     if (paymentMethod === "Wallet") {
-      if (user.walletBalance < finalPrice) {
-        return res.status(400).json({ message: "Insufficient wallet balance." });
-      }
-
-      // Deduct wallet balance
-      user.walletBalance -= finalPrice;
-
-      // Save transaction in wallet history
-      user.walletTransactions.push({
-        type: "DEBIT",
-        amount: finalPrice,
-        description: "Order Payment",
-        date: new Date(),
-      });
-
-      await user.save(); // Save updated wallet balance
-
-      // Save Order in Database
-      orderData.paymentStatus = "Paid"; // Wallet is pre-paid
-      const newOrder = new Order(orderData);
-      await newOrder.save();
-
-      console.log("✅ Order Saved in DB:", newOrder);
-
-      // Ledger Entry
-      await Ledger.create({
-        user: req.user.id,
-        order: newOrder._id,
-        type: "ORDER_PAYMENT",
-        amount: finalPrice,
-        description: `Payment for order ${newOrder._id} via Wallet`,
-        balanceAfterTransaction: user.walletBalance,
-      });
-
-      return res.status(201).json({
-        message: "Order placed successfully using Wallet",
-        order: newOrder,
-      });
+      orderData.paymentStatus = "Paid"; // Already paid via debitWallet
     }
+    //   if (user.walletBalance < finalPrice) {
+    //     return res.status(400).json({ message: "Insufficient wallet balance." });
+    //   }
+
+    //   // Deduct wallet balance
+    //   user.walletBalance -= finalPrice;
+
+    //   // Save transaction in wallet history
+    //   user.walletTransactions.push({
+    //     type: "DEBIT",
+    //     amount: finalPrice,
+    //     description: "Order Payment",
+    //     date: new Date(),
+    //   });
+
+    //   await user.save(); // Save updated wallet balance
+
+    //   // Save Order in Database
+    //   orderData.paymentStatus = "Paid"; // Wallet is pre-paid
+    //   const newOrder = new Order(orderData);
+    //   await newOrder.save();
+
+    //   console.log("✅ Order Saved in DB:", newOrder);
+
+    //   // Ledger Entry
+    //   await Ledger.create({
+    //     user: req.user.id,
+    //     order: newOrder._id,
+    //     type: "ORDER_PAYMENT",
+    //     amount: finalPrice,
+    //     description: `Payment for order ${newOrder._id} via Wallet`,
+    //     balanceAfterTransaction: user.walletBalance,
+    //   });
+
+    //   return res.status(201).json({
+    //     success:true,
+    //     message: "Order placed successfully using Wallet",
+    //     order: newOrder,
+    //   });
+    // }
 
     // **Razorpay Payment Handling**
     let razorpayOrder = null;

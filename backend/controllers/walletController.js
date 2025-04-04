@@ -44,7 +44,7 @@ export const creditWallet = async (req, res, next) => {
   
 
 export const debitWallet = async (req, res, next) => {
-  const { userId, amount } = req.body;
+  const { userId, amount,description = "Wallet debit" } = req.body;
 
   try {
     const user = await userModel.findById(userId);
@@ -58,18 +58,16 @@ export const debitWallet = async (req, res, next) => {
     user.walletBalance -= amount;
 
     // Log transaction
-    user.walletTransactions.push({
-      type: "DEBIT",
-      amount,
-      description: "Wallet debit",
-    });
-
-    user.walletTransactions.unshift({
+    const transaction = {
       type: "DEBIT",
       amount,
       description,
       date: new Date(),
-    });
+    };
+
+    // Log transaction
+    user.walletTransactions.unshift(transaction);
+
     // Create a Ledger Entry for this transaction
     await Ledger.create({
       user: user._id,
@@ -80,10 +78,11 @@ export const debitWallet = async (req, res, next) => {
     });
 
     await user.save();
-    res.status(200).json({
+    res.status(200).json({success:true,
       message: "Wallet debited successfully",
       walletBalance: user.walletBalance,
       transactions: user.walletTransactions.slice(0, 10),
+      transactionId: transaction.date.getTime().toString(),
     });
   } catch (err) {
     next(err);
@@ -98,7 +97,7 @@ export const debitWallet = async (req, res, next) => {
       // Perform wallet debit
       const user = await debitWallet(userId, totalAmount, "Purchase using wallet");
   
-      res.status(200).json({
+      res.status(200).json({ success:true,
         message: "Purchase successful",
         walletBalance: user.walletBalance,
         transactions: user.walletTransactions,
