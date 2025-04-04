@@ -9,7 +9,7 @@ import Cart from "../user/pages/Cart.jsx";
 
 import UserLayout from "../user/components/Userlayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import ForgetPassword from "../user/pages/Forgotpass.jsx";
+import ForgotPassword from "../user/pages/Forgotpass.jsx";
 import Profile from "../user/pages/Profile.jsx";
 
 import Checkout from "../user/pages/Checkout.jsx";
@@ -26,7 +26,7 @@ const UserRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<UserLayout />}>
         <Route index element={<Home />} />
-        <Route path="/forgot-password" element={<ForgetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="collection" element={<Collection />} />
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />

@@ -19,14 +19,14 @@ const ForgotPassword = () => {
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const navigate = useNavigate();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  // const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  // Redirect authenticated users to the homepage
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/", { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
+  // // Redirect authenticated users to the homepage
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate("/", { replace: true });
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   // Timer for OTP resend
   useEffect(() => {
