@@ -131,10 +131,12 @@ const user = useSelector((state) => state.user.user);
   
     try {
       // Deduct amount from wallet
-      await dispatch(debitWallet({ userId, amount: orderAmount })).unwrap();
-  
-      // Return success
-      return true;
+      const transaction = await dispatch(debitWallet({ userId, amount: orderAmount })).unwrap();
+        
+      if (transaction && transaction.success) {
+          return transaction.transactionId;  // Return transaction ID
+      }
+      return false;
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -219,9 +221,11 @@ const user = useSelector((state) => state.user.user);
             });
 
             if (!confirmation.isConfirmed) return;
+          
 
-            const walletSuccess = await handlePurchase(finalPrice);
-            if (!walletSuccess) return;
+             // Ensure wallet is debited only once
+             const transactionId = await handlePurchase(finalPrice);
+             if (!transactionId) return;
 
             const response = await dispatch(
                 createOrder({
@@ -237,7 +241,7 @@ const user = useSelector((state) => state.user.user);
                 })
             );
 
-            if (response.payload) {
+            if (createOrder.fulfilled.match(response)) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Order Placed Successfully',
@@ -245,10 +249,12 @@ const user = useSelector((state) => state.user.user);
                 }).then(() => {
                     dispatch(clearCart(userId));
                     navigate('/orders');
-                });
-            }
-            return;
-        }
+                  });
+                } else {
+                  throw new Error(response.payload?.message || 'Failed to create wallet order');
+                }
+                return;
+              }
 
         // Create Order on the Server
         const response = await dispatch(
