@@ -35,6 +35,26 @@ const SalesReport = () => {
   const currentData = data.slice(indexOfFirstItem, indexOfLastItem);
   // Fetch Sales Report
   const fetchSalesReport = async () => {
+    if (filter === 'custom') {
+      if (!startDate || !endDate) {
+        toast.error("Please select both start and end dates.");
+        return;
+      }
+  
+      const today = moment().endOf('day');
+      const start = moment(startDate);
+      const end = moment(endDate);
+  
+      if (start.isAfter(end)) {
+        toast.error("Start date cannot be after end date.");
+        return;
+      }
+  
+      if (start.isAfter(today) || end.isAfter(today)) {
+        toast.error("Dates cannot be in the future.");
+        return;
+      }
+    }
     setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/api/reports/generate`, {
@@ -174,20 +194,24 @@ const SalesReport = () => {
             <div className="col-md-3">
               <label className="form-label">Start Date</label>
               <input
-                type="date"
-                className="form-control"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+  type="date"
+  className="form-control"
+  max={moment().format('YYYY-MM-DD')}
+  value={startDate}
+  onChange={(e) => setStartDate(e.target.value)}
+/>
+
             </div>
             <div className="col-md-3">
               <label className="form-label">End Date</label>
               <input
-                type="date"
-                className="form-control"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+  type="date"
+  className="form-control"
+  value={endDate}
+  onChange={(e) => setEndDate(e.target.value)}
+  max={moment().format('YYYY-MM-DD')}
+/>
+
             </div>
           </>
         )}

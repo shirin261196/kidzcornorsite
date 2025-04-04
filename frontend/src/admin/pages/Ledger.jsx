@@ -28,6 +28,25 @@ const Ledger = () => {
   // Fetch Ledger Report
 // Fetch Ledger Report
 const fetchLedgerReport = async (newPage = 1) => {
+   // Date validation
+   if (!startDate || !endDate) {
+    toast.error("Please select both start and end dates.");
+    return;
+  }
+
+  const today = moment().endOf('day');
+  const start = moment(startDate);
+  const end = moment(endDate);
+
+  if (start.isAfter(end)) {
+    toast.error("Start date cannot be after end date.");
+    return;
+  }
+
+  if (start.isAfter(today) || end.isAfter(today)) {
+    toast.error("Dates cannot be in the future.");
+    return;
+  }
     setLoading(true);
     try {
         const response = await axiosInstance.get('/ledgerreport', {
@@ -111,20 +130,23 @@ const fetchLedgerReport = async (newPage = 1) => {
         <div className="col-md-4">
           <label className="form-label">Start Date</label>
           <input
-            type="date"
-            className="form-control"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+  type="date"
+  className="form-control"
+  value={startDate}
+  onChange={(e) => setStartDate(e.target.value)}
+  max={moment().format('YYYY-MM-DD')}
+/>
         </div>
         <div className="col-md-4">
           <label className="form-label">End Date</label>
           <input
-            type="date"
-            className="form-control"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
+  type="date"
+  className="form-control"
+  value={endDate}
+  onChange={(e) => setEndDate(e.target.value)}
+  max={moment().format('YYYY-MM-DD')}
+/>
+
         </div>
         <div className="col-md-4 d-flex align-items-end">
           <button className="btn btn-primary w-100" onClick={fetchLedgerReport} disabled={loading}>
