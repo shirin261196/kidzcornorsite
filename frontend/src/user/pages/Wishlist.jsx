@@ -174,7 +174,7 @@ const WishlistPage = () => {
                   </div>
 
                   <div className="mt-auto d-flex justify-content-between">
-                    <Link to={`/product/${product.productId}`} className="btn btn-primary btn-sm">
+                    <Link to={`/product/${product.productId._id}`} className="btn btn-primary btn-sm">
                       View Details
                     </Link>
                     <button
