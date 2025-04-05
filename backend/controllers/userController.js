@@ -357,7 +357,7 @@ export const editAddress = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).json(user.addresses[addressIndex]);
+    res.status(200).json({success: true, address: user.addresses[addressIndex].toObject()});
   } catch (error) {
     next(error);
   }
@@ -383,7 +383,7 @@ export const deleteAddress = async (req, res, next) => {
     user.addresses.splice(addressIndex, 1);
     await user.save();
 
-    res.status(200).json({ success: true, message: 'Address deleted successfully' });
+    res.status(200).json({ success: true, message: 'Address deleted successfully' ,addressId});
   } catch (error) {
     next(error);
   }
